@@ -1,46 +1,46 @@
-# Temporal Odyssey
+### Temporal Odyssey
 
-**Temporal Odyssey** is an immersive reinforcement learning project that guides you through various eras inspired by H.G. Wells' "The Time Machine." As an agent, you navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
+Temporal Odyssey is an immersive reinforcement learning project that guides you through various eras inspired by H.G. Wells' "The Time Machine." As an agent, you navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
 
-## Key Features
+### Key Features
 
-- **Immersive Time Travel Experience**
-  - Explore meticulously crafted time periods.
-  - Each era has its own atmosphere, challenges, and rewards.
-  - Travel from the primitive past to a technologically advanced future.
+**Immersive Time Travel Experience**
+- Explore meticulously crafted time periods.
+- Each era has its own atmosphere, challenges, and rewards.
+- Travel from the primitive past to a technologically advanced future.
 
-- **Dynamic Environments**
-  - Interact with evolving environments that react to your actions.
-  - Shape the world around you through your interactions with objects and characters.
-  
-- **Versatile Agent Capabilities**
-  - Perform era-specific actions:
-    - Navigate treacherous terrains.
-    - Gather resources, craft tools, and build shelters in the primitive past.
-    - Trade goods and make strategic decisions in the present.
-    - Scavenge supplies and navigate dangers in dystopian futures.
-  
-- **Intelligent Reward System**
-  - Sophisticated rewards encourage exploration and survival.
-  - Actions and decisions have consequences, shaping your path through history.
-  
-- **Adaptive Challenges**
-  - Face obstacles that evolve with your learning progress.
-  - Ensure continuous growth and replayability.
-  
-- **Advanced Learning Techniques**
-  - Utilize cutting-edge reinforcement learning methods like PPO, A3C, transfer learning, and meta-learning.
-  - Leverage knowledge from one era to adapt quickly to another.
-  
-- **NPC Interactions**
-  - Engage with non-player characters across different eras.
-  - Gather information, trade items, and form alliances to aid your journey.
-  
-- **Quest System**
-  - Embark on quests and missions within each era.
-  - Complete objectives, unravel mysteries, and earn rewards to unlock new possibilities.
+**Dynamic Environments**
+- Interact with evolving environments that react to your actions.
+- Shape the world around you through your interactions with objects and characters.
 
-## Installation
+**Versatile Agent Capabilities**
+- Perform era-specific actions:
+  - Navigate treacherous terrains.
+  - Gather resources, craft tools, and build shelters in the primitive past.
+  - Trade goods and make strategic decisions in the present.
+  - Scavenge supplies and navigate dangers in dystopian futures.
+
+**Intelligent Reward System**
+- Sophisticated rewards encourage exploration and survival.
+- Actions and decisions have consequences, shaping your path through history.
+
+**Adaptive Challenges**
+- Face obstacles that evolve with your learning progress.
+- Ensure continuous growth and replayability.
+
+**Advanced Learning Techniques**
+- Utilize cutting-edge reinforcement learning methods like PPO, A3C, transfer learning, and meta-learning.
+- Leverage knowledge from one era to adapt quickly to another.
+
+**NPC Interactions**
+- Engage with non-player characters across different eras.
+- Gather information, trade items, and form alliances to aid your journey.
+
+**Quest System**
+- Embark on quests and missions within each era.
+- Complete objectives, unravel mysteries, and earn rewards to unlock new possibilities.
+
+### Installation
 
 To start your journey through Temporal Odyssey, follow these steps:
 
@@ -74,7 +74,7 @@ To start your journey through Temporal Odyssey, follow these steps:
        source venv/bin/activate
        ```
 
-## Getting Started
+### Getting Started
 
 To begin your adventure through time:
 
@@ -100,36 +100,43 @@ To begin your adventure through time:
 
 2. **Customize your agent and experiment with different learning algorithms.**
 
-## Project Structure
+### Project Structure
 
-- **`temporal_odyssey/envs/`**
-  - **`time_travel_env.py`**: Defines the `TimeTravelEnv` class, representing the time travel environment.
+- `temporal_odyssey/envs/`
+  - `time_travel_env.py`: Defines the TimeTravelEnv class, representing the time travel environment.
 
-- **`temporal_odyssey/agents/`**
-  - **`dqn_agent.py`**: Implements the DQN agent with advanced techniques.
-  - **`ppo_agent.py`**: Implements the PPO agent.
-  - **`a3c_agent.py`**: Implements the A3C agent.
+- `temporal_odyssey/agents/`
+  - `dqn_agent.py`: Implements the DQN agent with advanced techniques.
+  - `ppo_agent.py`: Implements the PPO agent.
+  - `a3c_agent.py`: Implements the A3C agent.
+  - `hybrid_learning.py`: Implements hybrid learning techniques.
 
-- **`temporal_odyssey/models/`**
-  - **`transfer_learning.py`**: Implements transfer learning functionality.
-  - **`meta_learning.py`**: Implements meta-learning techniques.
+- `temporal_odyssey/models/`
+  - `transfer_learning.py`: Implements transfer learning functionality.
+  - `meta_learning.py`: Implements meta-learning techniques.
 
-- **`temporal_odyssey/quests/`**
-  - **`quest_manager.py`**: Defines the `QuestManager` class for managing quests and missions.
+- `temporal_odyssey/quests/`
+  - `quest_manager.py`: Defines the QuestManager class for managing quests and missions.
+  - `dynamic_story.py`: Implements dynamic story generation.
 
-- **`temporal_odyssey/npcs/`**
-  - **`npc_manager.py`**: Defines the `NPCManager` class for managing NPCs and their interactions.
+- `temporal_odyssey/npcs/`
+  - `npc_manager.py`: Defines the NPCManager class for managing NPCs and their interactions.
+  - `npc_behaviors.py`: Implements dynamic NPC behaviors.
 
-- **`README.md`**: Overview and instructions for getting started.
+- `temporal_odyssey/monitoring/`
+  - `agent_metrics.py`: Implements agent performance metrics monitoring.
+  - `telemetry.py`: Implements telemetry and feedback collection.
 
-- **`requirements.txt`**: Dependencies required to run the project.
+- `README.md`: Overview and instructions for getting started.
+- `requirements.txt`: Dependencies required to run the project.
 
-## Contributing
+### Contributing
 
-- **Contributions**:
-  - Welcome contributions from the community.
-  - Open an issue on GitHub for ideas, suggestions, or bug reports.
-  - Fork the repository and submit a pull request with your changes.
+**Contributions:**
+- Welcome contributions from the community.
+- Open an issue on GitHub for ideas, suggestions, or bug reports.
+- Fork the repository and submit a pull request with your changes.
+
 
 ## License
 
