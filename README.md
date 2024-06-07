@@ -17,12 +17,12 @@ To embark on your Temporal Odyssey, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/temporal-odyssey.git
+   git clone https://github.com/ShaliniAnandaPhD/Temporal--Odyssey.git
    ```
 
 2. Navigate to the project directory:
    ```
-   cd temporal-odyssey
+   cd Temporal-Odyssey
    ```
 
 3. Install the required dependencies:
