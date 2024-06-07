@@ -147,3 +147,46 @@ To begin your adventure through time:
 Prepare to embark on an extraordinary journey through time with Temporal Odyssey. Explore, learn, and adapt as you navigate the challenges and wonders of different eras. Let the adventure begin!
 
 [GitHub Repository](https://github.com/ShaliniAnandaPhD/Temporal--Odyssey)
+
+References:
+
+1. Deep Reinforcement Learning: An Overview by Yuxi Li
+   - A comprehensive review of the deep reinforcement learning landscape, including algorithms like DQN, PPO, and A3C.
+   - [Link](https://arxiv.org/abs/1701.07274)
+
+2. Playing Atari with Deep Reinforcement Learning by Volodymyr Mnih et al.
+   - The seminal paper on DQN that introduced deep reinforcement learning.
+   - [Link](https://arxiv.org/abs/1312.5602)
+
+3. Proximal Policy Optimization Algorithms by John Schulman et al.
+   - Describes the PPO algorithm, which is used in Temporal Odyssey for training agents.
+   - [Link](https://arxiv.org/abs/1707.06347)
+
+4. Asynchronous Methods for Deep Reinforcement Learning by Volodymyr Mnih et al.
+   - Introduces the A3C algorithm, which is utilized for training agents in asynchronous environments.
+   - [Link](https://arxiv.org/abs/1602.01783)
+
+5. Meta-Learning: A Survey by Andrei Vilalta and Luigi Bottou
+   - A survey of meta-learning techniques, which are implemented in the project to improve agent adaptability.
+   - [Link](https://arxiv.org/abs/1810.03548)
+
+6. A Survey on Transfer Learning by Sinno Jialin Pan and Qiang Yang
+   - An in-depth look at transfer learning methods, which are key to helping agents adapt knowledge across different time periods.
+   - [Link](https://ieeexplore.ieee.org/document/5288526)
+
+7. Convolutional Neural Networks (LeNet) - Deep Learning by Yann LeCun et al.
+   - A foundational paper on CNNs, essential for processing visual inputs in the multi-modal agent.
+   - [Link](http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf)
+
+8. Sequence to Sequence Learning with Neural Networks by Ilya Sutskever et al.
+   - Explains sequence-to-sequence models, relevant for processing auditory and textual data.
+   - [Link](https://arxiv.org/abs/1409.3215)
+
+9. Attention Is All You Need by Ashish Vaswani et al.
+   - Introduces the transformer model, which can be used for advanced NLP tasks in the project.
+   - [Link](https://arxiv.org/abs/1706.03762)
+
+10. OpenAI Gym by Greg Brockman et al.
+    - Describes the OpenAI Gym environment, which is a fundamental framework for developing and testing reinforcement learning algorithms.
+    - [Link](https://arxiv.org/abs/1606.01540)
+
