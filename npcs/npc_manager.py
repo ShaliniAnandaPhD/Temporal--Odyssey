@@ -1,4 +1,4 @@
-# temporal_odyssey/npcs/npc_manager.py
+
 
 import logging
 from temporal_odyssey.npcs.npc_behaviors import FriendlyBehavior, MysteriousBehavior
