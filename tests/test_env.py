@@ -1,5 +1,3 @@
-# test_env.py
-
 import unittest
 import numpy as np
 from temporal_odyssey.envs.time_travel_env import TimeTravelEnv
