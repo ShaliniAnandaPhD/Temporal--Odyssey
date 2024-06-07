@@ -1,5 +1,3 @@
-# temporal_odyssey/agents/skills.py
-
 class Skill:
     def __init__(self, name, level=1, experience=0):
         """
