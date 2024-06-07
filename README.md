@@ -166,7 +166,7 @@ References:
    - Introduces the A3C algorithm, which is utilized for training agents in asynchronous environments.
    - [Link](https://arxiv.org/abs/1602.01783)
 
-5. Meta-Learning: A Survey by Andrei Vilalta and Luigi Bottou
+5. Meta-Learning: A Survey by Joaquin Vanschoren
    - A survey of meta-learning techniques, which are implemented in the project to improve agent adaptability.
    - [Link](https://arxiv.org/abs/1810.03548)
 
