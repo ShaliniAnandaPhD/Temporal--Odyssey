@@ -1,255 +1,229 @@
-# temporal_odyssey/quests/quest_manager.py
-
+import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class Quest:
-    def __init__(self, name, description, objectives, rewards):
-        """
-        Initialize a new quest.
-
-        Parameters:
-        name (str): The name of the quest.
-        description (str): A brief description of the quest.
-        objectives (list): A list of QuestObjective instances that define the quest objectives.
-        rewards (list): A list of QuestReward instances that define the quest rewards.
-        """
-        self.name = name
-        self.description = description
-        self.objectives = objectives
-        self.rewards = rewards
-        self.completed = False
-        self.start_time = None
-        self.end_time = None
-        logger.info(f"Quest '{self.name}' initialized.")
-
-    def start(self):
-        """
-        Start the quest.
-        """
-        self.start_time = datetime.now()
-        logger.info(f"Quest '{self.name}' started at {self.start_time}.")
-
-    def check_completion(self, agent):
-        """
-        Check if all objectives of the quest are completed.
-
-        Parameters:
-        agent (object): The agent attempting the quest.
-        
-        Returns:
-        bool: True if all objectives are completed, False otherwise.
-        """
-        for objective in self.objectives:
-            if not objective.is_completed(agent):
-                return False
-        self.completed = True
-        self.end_time = datetime.now()
-        logger.info(f"Quest '{self.name}' completed at {self.end_time}.")
-        return True
-
-    def grant_rewards(self, agent):
-        """
-        Grant rewards to the agent upon quest completion.
-
-        Parameters:
-        agent (object): The agent who completed the quest.
-        """
-        for reward in self.rewards:
-            reward.grant(agent)
-        logger.info(f"Rewards for quest '{self.name}' granted to agent.")
-
-class QuestObjective:
-    def __init__(self, description, completion_check):
-        """
-        Initialize a new quest objective.
-
-        Parameters:
-        description (str): A brief description of the objective.
-        completion_check (function): A function that checks if the objective is completed.
-        """
-        self.description = description
-        self.completion_check = completion_check
-        logger.info(f"QuestObjective '{self.description}' initialized.")
-
-    def is_completed(self, agent):
-        """
-        Check if the objective is completed by the agent.
-
-        Parameters:
-        agent (object): The agent attempting the objective.
-        
-        Returns:
-        bool: True if the objective is completed, False otherwise.
-        """
-        result = self.completion_check(agent)
-        logger.info(f"QuestObjective '{self.description}' completion check: {result}")
-        return result
-
-class QuestReward:
-    def __init__(self, reward_type, value):
-        """
-        Initialize a new quest reward.
-
-        Parameters:
-        reward_type (str): The type of the reward (e.g., "score", "item").
-        value (any): The value of the reward.
-        """
-        self.reward_type = reward_type
-        self.value = value
-        logger.info(f"QuestReward of type '{self.reward_type}' with value '{self.value}' initialized.")
-
-    def grant(self, agent):
-        """
-        Grant the reward to the agent based on the reward type and value.
-
-        Parameters:
-        agent (object): The agent receiving the reward.
-        """
-        if self.reward_type == "score":
-            agent.score += self.value
-            logger.info(f"Granted {self.value} score to agent.")
-        elif self.reward_type == "item":
-            agent.inventory.add_item(self.value)
-            logger.info(f"Granted item '{self.value}' to agent.")
-        else:
-            logger.warning(f"Unknown reward type '{self.reward_type}'.")
-
 class QuestManager:
-    def __init__(self):
+    def __init__(self, quest_data_file="quests.json", agent_state_file="agent_state.json"):
         """
-        Initialize the QuestManager.
+        Initialize the QuestManager class.
+
+        Parameters:
+        quest_data_file (str): Path to the JSON file containing quest data.
+        agent_state_file (str): Path to the JSON file containing the agent's state.
         """
+        self.quest_data_file = quest_data_file
+        self.agent_state_file = agent_state_file
         self.quests = []
+        self.load_quests()
+        self.load_agent_state()
         logger.info("QuestManager initialized.")
 
-    def add_quest(self, quest):
+    def load_quests(self):
         """
-        Add a new quest to the quest manager.
+        Load quests from the JSON file.
+        """
+        try:
+            with open(self.quest_data_file, 'r') as file:
+                self.quests = json.load(file)
+                logger.info("Quests loaded.")
+        except FileNotFoundError:
+            self.quests = []
+            logger.warning("Quest data file not found. Initialized with empty quest list.")
+
+    def save_quests(self):
+        """
+        Save the quests to the JSON file.
+        """
+        with open(self.quest_data_file, 'w') as file:
+            json.dump(self.quests, file, indent=4)
+            logger.info("Quests saved.")
+
+    def load_agent_state(self):
+        """
+        Load the agent's state from the JSON file.
+        """
+        try:
+            with open(self.agent_state_file, 'r') as file:
+                self.agent_state = json.load(file)
+                logger.info("Agent state loaded.")
+        except FileNotFoundError:
+            self.agent_state = {
+                "completed_quests": [],
+                "current_quests": [],
+                "skills": {},
+                "level": 1,
+                "inventory": {},
+                "quest_progress": {}
+            }
+            logger.warning("Agent state file not found. Initialized with default state.")
+
+    def save_agent_state(self):
+        """
+        Save the agent's state to the JSON file.
+        """
+        with open(self.agent_state_file, 'w') as file:
+            json.dump(self.agent_state, file, indent=4)
+            logger.info("Agent state saved.")
+
+    def update_agent_state(self, updates):
+        """
+        Update the agent's state with the provided updates.
 
         Parameters:
-        quest (Quest): The quest to be added.
+        updates (dict): Dictionary containing the updates to apply to the agent's state.
         """
-        self.quests.append(quest)
-        logger.info(f"Quest '{quest.name}' added to QuestManager.")
+        self.agent_state.update(updates)
+        self.save_agent_state()
+        logger.info(f"Agent state updated with: {updates}")
 
-    def remove_quest(self, quest):
+    def check_quest_availability(self):
         """
-        Remove a quest from the quest manager.
-
-        Parameters:
-        quest (Quest): The quest to be removed.
+        Check available quests based on the agent's state and prerequisites.
         """
-        self.quests.remove(quest)
-        logger.info(f"Quest '{quest.name}' removed from QuestManager.")
-
-    def get_available_quests(self, agent):
-        """
-        Get the list of available quests for the agent.
-
-        Parameters:
-        agent (object): The agent seeking quests.
-        
-        Returns:
-        list: A list of available quests.
-        """
-        available_quests = [quest for quest in self.quests if not quest.completed and self._is_quest_available(quest, agent)]
-        logger.info(f"Available quests for agent: {[quest.name for quest in available_quests]}")
+        available_quests = []
+        for quest in self.quests:
+            if quest["id"] not in self.agent_state["completed_quests"] and self._check_prerequisites(quest):
+                available_quests.append(quest)
+        logger.info(f"Available quests: {available_quests}")
         return available_quests
 
-    def update_quests(self, agent):
+    def _check_prerequisites(self, quest):
         """
-        Update the state of quests based on the agent's actions and progress.
+        Check if the agent meets the prerequisites for a quest.
 
         Parameters:
-        agent (object): The agent whose progress is being updated.
-        """
-        for quest in self.quests:
-            if not quest.completed and quest.check_completion(agent):
-                quest.grant_rewards(agent)
-                logger.info(f"Quest '{quest.name}' updated for agent.")
+        quest (dict): The quest to check prerequisites for.
 
-    def _is_quest_available(self, quest, agent):
-        """
-        Check if the quest is available for the agent.
-
-        Parameters:
-        quest (Quest): The quest to be checked.
-        agent (object): The agent seeking quests.
-        
         Returns:
-        bool: True if the quest is available, False otherwise.
+        bool: True if the agent meets the prerequisites, False otherwise.
         """
-        # Implement quest availability logic based on the agent's state, location, or other factors.
-        return True  # Placeholder for real logic
+        prerequisites = quest.get("prerequisites", {})
+        for key, value in prerequisites.items():
+            if self.agent_state.get(key) < value:
+                return False
+        return True
 
-    def adapt_quests(self, agent):
+    def accept_quest(self, quest_id):
         """
-        Adapt quests based on the agent's skills, history, and current state.
+        Accept a quest and add it to the agent's current quests.
 
         Parameters:
-        agent (object): The agent whose quests are being adapted.
+        quest_id (int): The ID of the quest to accept.
         """
         for quest in self.quests:
-            if not quest.completed:
-                # Example adaptation: Increase rewards for more skilled agents
-                if agent.level > 5:
-                    for reward in quest.rewards:
-                        if reward.reward_type == "score":
-                            reward.value *= 1.5
-                            logger.info(f"Increased reward for quest '{quest.name}' for skilled agent.")
+            if quest["id"] == quest_id and quest not in self.agent_state["current_quests"]:
+                self.agent_state["current_quests"].append(quest)
+                self.agent_state["quest_progress"][quest_id] = {"started_at": datetime.now().isoformat(), "progress": {}}
+                self.save_agent_state()
+                logger.info(f"Quest accepted: {quest}")
+                return True
+        logger.warning(f"Quest with ID {quest_id} not found or already accepted.")
+        return False
+
+    def complete_quest(self, quest_id):
+        """
+        Complete a quest and provide the rewards to the agent.
+
+        Parameters:
+        quest_id (int): The ID of the quest to complete.
+        """
+        for quest in self.agent_state["current_quests"]:
+            if quest["id"] == quest_id:
+                self.agent_state["current_quests"].remove(quest)
+                self.agent_state["completed_quests"].append(quest_id)
+                self._apply_rewards(quest)
+                self.save_agent_state()
+                logger.info(f"Quest completed: {quest}")
+                return True
+        logger.warning(f"Quest with ID {quest_id} not found in current quests.")
+        return False
+
+    def _apply_rewards(self, quest):
+        """
+        Apply the rewards of a completed quest to the agent's state.
+
+        Parameters:
+        quest (dict): The completed quest.
+        """
+        rewards = quest.get("rewards", {})
+        for key, value in rewards.items():
+            if key in self.agent_state:
+                self.agent_state[key] += value
+            else:
+                self.agent_state[key] = value
+        logger.info(f"Rewards applied: {rewards}")
+
+    def update_quest_progress(self, quest_id, progress_updates):
+        """
+        Update the progress of a current quest.
+
+        Parameters:
+        quest_id (int): The ID of the quest to update.
+        progress_updates (dict): The progress updates to apply.
+        """
+        if quest_id in self.agent_state["quest_progress"]:
+            self.agent_state["quest_progress"][quest_id]["progress"].update(progress_updates)
+            self.save_agent_state()
+            logger.info(f"Quest progress updated for quest ID {quest_id}: {progress_updates}")
+        else:
+            logger.warning(f"Quest with ID {quest_id} not found in current quest progress.")
+
+    def generate_dynamic_quest(self):
+        """
+        Generate a dynamic quest based on the agent's actions, decisions, or the current state of the game world.
+        """
+        # Example: Generate a quest based on the agent's current level and skills
+        quest = {
+            "id": len(self.quests) + 1,
+            "name": f"Dynamic Quest {len(self.quests) + 1}",
+            "description": "A quest generated dynamically based on your current state.",
+            "objectives": {"collect": 5, "eliminate": 3},
+            "prerequisites": {"level": self.agent_state["level"]},
+            "rewards": {"experience": 100, "gold": 50}
+        }
+        self.quests.append(quest)
+        self.save_quests()
+        logger.info(f"Dynamic quest generated: {quest}")
+        return quest
+
+    def get_quest_dialog(self, quest_id):
+        """
+        Get the dialog for a quest.
+
+        Parameters:
+        quest_id (int): The ID of the quest to get dialog for.
+
+        Returns:
+        str: The quest dialog.
+        """
+        for quest in self.quests:
+            if quest["id"] == quest_id:
+                return quest.get("dialog", "No dialog available for this quest.")
+        logger.warning(f"Quest with ID {quest_id} not found.")
+        return "Quest not found."
 
 # Example usage
 if __name__ == "__main__":
-    class Agent:
-        def __init__(self):
-            self.score = 0
-            self.level = 1
-            self.inventory = Inventory()
-
-        def level_up(self):
-            self.level += 1
-
-    class Inventory:
-        def __init__(self):
-            self.items = []
-
-        def add_item(self, item):
-            self.items.append(item)
-
-    def example_completion_check(agent):
-        return agent.score >= 10
-
-    agent = Agent()
     quest_manager = QuestManager()
 
-    # Create example quests
-    quest1 = Quest(
-        name="First Quest",
-        description="Complete the first task",
-        objectives=[QuestObjective("Score 10 points", example_completion_check)],
-        rewards=[QuestReward("score", 100)]
-    )
+    # Accept a quest
+    quest_manager.accept_quest(1)
 
-    quest_manager.add_quest(quest1)
+    # Update quest progress
+    quest_manager.update_quest_progress(1, {"collect": 3})
 
-    # Example agent interactions
-    available_quests = quest_manager.get_available_quests(agent)
-    for quest in available_quests:
-        quest.start()
-        agent.score = 10  # Simulate completing the objective
-        quest_manager.update_quests(agent)
+    # Complete a quest
+    quest_manager.complete_quest(1)
 
-    # Adapt quests based on agent's skills
-    agent.level_up()
-    agent.level_up()
-    agent.level_up()
-    agent.level_up()
-    agent.level_up()
-    agent.level_up()
-    quest_manager.adapt_quests(agent)
+    # Generate a dynamic quest
+    quest_manager.generate_dynamic_quest()
+
+    # Get quest dialog
+    dialog = quest_manager.get_quest_dialog(1)
+    print("Quest Dialog:", dialog)
+
 
