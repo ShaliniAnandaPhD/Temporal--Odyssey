@@ -1,113 +1,104 @@
-import logging
+import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+import logging
 from collections import deque
-from statistics import mean
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AgentMetrics:
-    def __init__(self, window_size=100):
-        self.rewards = []
-        self.steps = []
-        self.epsilons = []
-        self.window_size = window_size
-        self.rewards_window = deque(maxlen=window_size)
-        self.steps_window = deque(maxlen=window_size)
-        logger.info("AgentMetrics initialized.")
-
-    def record(self, reward, steps, epsilon):
+    def __init__(self, log_dir="logs/"):
         """
-        Record metrics for each episode.
+        Initialize the AgentMetrics class.
+        
+        Args:
+            log_dir (str): Directory to save TensorBoard logs.
+        """
+        self.log_dir = log_dir
+        self.writer = tf.summary.create_file_writer(log_dir)
+        self.rewards = deque(maxlen=100)  # Store rewards for the last 100 episodes
+        self.losses = deque(maxlen=100)   # Store losses for the last 100 episodes
+        self.steps = 0  # Track the number of training steps
+        logger.info("AgentMetrics initialized with log directory: %s", log_dir)
+
+    def log_metrics(self, episode, reward, loss):
+        """
+        Log custom metrics to TensorBoard.
+        
+        Args:
+            episode (int): The current episode number.
+            reward (float): The reward obtained in the current episode.
+            loss (float): The loss obtained in the current episode.
         """
         self.rewards.append(reward)
-        self.steps.append(steps)
-        self.epsilons.append(epsilon)
-        self.rewards_window.append(reward)
-        self.steps_window.append(steps)
-        logger.info(f"Recorded metrics - Reward: {reward}, Steps: {steps}, Epsilon: {epsilon}")
+        self.losses.append(loss)
+        avg_reward = np.mean(self.rewards)
+        avg_loss = np.mean(self.losses)
+        self.steps += 1
+        
+        with self.writer.as_default():
+            tf.summary.scalar('Episode Reward', reward, step=episode)
+            tf.summary.scalar('Average Reward', avg_reward, step=episode)
+            tf.summary.scalar('Loss', loss, step=self.steps)
+            tf.summary.scalar('Average Loss', avg_loss, step=self.steps)
+        
+        logger.info("Logged metrics for episode %d: reward=%.2f, avg_reward=%.2f, loss=%.2f, avg_loss=%.2f",
+                    episode, reward, avg_reward, loss, avg_loss)
 
-    def plot_metrics(self):
+    def calculate_custom_metrics(self, rewards, losses):
         """
-        Plot the recorded metrics.
+        Calculate and return custom metrics.
+        
+        Args:
+            rewards (list): List of rewards.
+            losses (list): List of losses.
+        
+        Returns:
+            dict: A dictionary containing custom metrics.
         """
-        fig, axs = plt.subplots(3, 1, figsize=(10, 15))
-        axs[0].plot(self.rewards, label='Rewards')
-        axs[0].set_title('Rewards per Episode')
-        axs[0].set_xlabel('Episode')
-        axs[0].set_ylabel('Reward')
-        axs[0].legend()
+        avg_reward = np.mean(rewards)
+        avg_loss = np.mean(losses)
+        max_reward = np.max(rewards)
+        min_loss = np.min(losses)
+        
+        metrics = {
+            'average_reward': avg_reward,
+            'average_loss': avg_loss,
+            'max_reward': max_reward,
+            'min_loss': min_loss,
+        }
+        
+        logger.info("Calculated custom metrics: %s", metrics)
+        return metrics
 
-        axs[1].plot(self.steps, label='Steps')
-        axs[1].set_title('Steps per Episode')
-        axs[1].set_xlabel('Episode')
-        axs[1].set_ylabel('Steps')
-        axs[1].legend()
-
-        axs[2].plot(self.epsilons, label='Epsilon')
-        axs[2].set_title('Epsilon per Episode')
-        axs[2].set_xlabel('Episode')
-        axs[2].set_ylabel('Epsilon')
-        axs[2].legend()
-
-        plt.tight_layout()
-        plt.show()
-        logger.info("Plotted metrics.")
-
-    def get_average_metrics(self):
-        """
-        Get average metrics over the specified window size.
-        """
-        avg_reward = mean(self.rewards_window) if self.rewards_window else 0
-        avg_steps = mean(self.steps_window) if self.steps_window else 0
-        logger.info(f"Average metrics - Reward: {avg_reward}, Steps: {avg_steps}")
-        return avg_reward, avg_steps
-
-    def save_metrics(self, filepath):
-        """
-        Save the recorded metrics to a file.
-        """
-        try:
-            np.savez(filepath, rewards=self.rewards, steps=self.steps, epsilons=self.epsilons)
-            logger.info(f"Metrics saved to {filepath}")
-        except Exception as e:
-            logger.error(f"Error saving metrics: {e}")
-
-    def load_metrics(self, filepath):
-        """
-        Load metrics from a file.
-        """
-        try:
-            data = np.load(filepath)
-            self.rewards = data['rewards'].tolist()
-            self.steps = data['steps'].tolist()
-            self.epsilons = data['epsilons'].tolist()
-            logger.info(f"Metrics loaded from {filepath}")
-        except Exception as e:
-            logger.error(f"Error loading metrics: {e}")
-
-# Example usage
+# Example usage within the agent's training loop
 if __name__ == "__main__":
-    agent_metrics = AgentMetrics()
+    import gym
+    from hybrid_learning import HybridLearningAgent  # Ensure you import the agent correctly
 
-    # Simulate recording metrics
-    for episode in range(200):
-        reward = np.random.randint(0, 100)
-        steps = np.random.randint(1, 200)
-        epsilon = max(0.01, np.random.rand())
-        agent_metrics.record(reward, steps, epsilon)
+    env = gym.make('CartPole-v1')
+    agent = HybridLearningAgent(env)
+    metrics = AgentMetrics()
+    
+    num_episodes = 1000
 
-    # Plot metrics
-    agent_metrics.plot_metrics()
+    for episode in range(num_episodes):
+        state = env.reset()
+        done = False
+        total_reward = 0
+        total_loss = 0
+        steps = 0
+        
+        while not done:
+            action = agent.act(state)
+            next_state, reward, done, _ = env.step(action)
+            total_reward += reward
+            loss = agent.train_step(state, action, reward, next_state, done)
+            total_loss += loss
+            state = next_state
+            steps += 1
+        
+        avg_loss = total_loss / steps if steps > 0 else total_loss
+        metrics.log_metrics(episode, total_reward, avg_loss)
 
-    # Get average metrics
-    avg_reward, avg_steps = agent_metrics.get_average_metrics()
-    print(f"Average Reward: {avg_reward}, Average Steps: {avg_steps}")
-
-    # Save metrics
-    agent_metrics.save_metrics('metrics.npz')
-
-    # Load metrics
-    agent_metrics.load_metrics('metrics.npz')
