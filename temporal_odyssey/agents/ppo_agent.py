@@ -1,19 +1,25 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Dropout, Concatenate, Embedding, GlobalAveragePooling1D, MultiHeadAttention, LayerNormalization, Add
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow_probability.python.distributions import MultivariateNormalDiag
 import gym
 import logging
 import matplotlib.pyplot as plt
 
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class PPOAgent:
-    def __init__(self, env, transfer_learning=None, meta_learning=None):
+    def __init__(self, env, vocab_size=10000, max_seq_length=100, transfer_learning=None, meta_learning=None):
         self.env = env
+        self.vocab_size = vocab_size
+        self.max_seq_length = max_seq_length
+        self.tokenizer = Tokenizer(num_words=self.vocab_size)
         self.transfer_learning = transfer_learning
         self.meta_learning = meta_learning
 
@@ -26,7 +32,7 @@ class PPOAgent:
         self.max_grad_norm = 0.5
 
         # Initialize actor and critic networks
-        self.actor_network = self._build_actor_network()
+        self.actor_network, self.policy_model = self._build_actor_network()
         self.critic_network = self._build_critic_network()
 
         # Initialize optimizers
@@ -43,31 +49,74 @@ class PPOAgent:
         self.log_std = tf.Variable(np.zeros(self.env.action_space.shape), dtype=tf.float32)
 
     def _build_actor_network(self):
-        """Builds the actor network model."""
-        model = Sequential()
-        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.env.observation_space.shape))
-        model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(self.env.action_space.shape[0], activation='tanh'))
-        return model
+        """Builds the actor network model with multi-modal inputs."""
+        # Visual input processing
+        visual_input = Input(shape=(224, 224, 3), name='visual_input')
+        x1 = Conv2D(32, (8, 8), strides=(4, 4), activation='relu')(visual_input)
+        x1 = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(x1)
+        x1 = Conv2D(64, (3, 3), activation='relu')(x1)
+        x1 = Flatten()(x1)
+
+        # Auditory input processing using Conformer
+        auditory_input = Input(shape=(100, 80), name='auditory_input')
+        x2 = Conv2D(32, (3, 3), activation='relu')(auditory_input)
+        x2 = GlobalAveragePooling1D()(x2)
+
+        # Textual input processing using BERT
+        textual_input = Input(shape=(self.max_seq_length,), name='textual_input')
+        x3 = Embedding(self.vocab_size, 128)(textual_input)
+        x3 = GlobalAveragePooling1D()(x3)
+
+        # Combine all inputs
+        combined = Concatenate()([x1, x2, x3])
+        z = Dense(256, activation='relu')(combined)
+        z = Dropout(0.5)(z)
+
+        # Policy output
+        policy_output = Dense(self.env.action_space.shape[0], activation='tanh', name='policy_output')(z)
+
+        actor_network = Model(inputs=[visual_input, auditory_input, textual_input], outputs=policy_output)
+        policy_model = Model(inputs=[visual_input, auditory_input, textual_input], outputs=policy_output)
+        logger.info("Multi-modal actor network built successfully.")
+        return actor_network, policy_model
 
     def _build_critic_network(self):
         """Builds the critic network model."""
-        model = Sequential()
-        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.env.observation_space.shape))
-        model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(1, activation='linear'))
-        return model
+        visual_input = Input(shape=(224, 224, 3), name='visual_input')
+        x1 = Conv2D(32, (8, 8), strides=(4, 4), activation='relu')(visual_input)
+        x1 = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(x1)
+        x1 = Conv2D(64, (3, 3), activation='relu')(x1)
+        x1 = Flatten()(x1)
+
+        auditory_input = Input(shape=(100, 80), name='auditory_input')
+        x2 = Conv2D(32, (3, 3), activation='relu')(auditory_input)
+        x2 = GlobalAveragePooling1D()(x2)
+
+        textual_input = Input(shape=(self.max_seq_length,), name='textual_input')
+        x3 = Embedding(self.vocab_size, 128)(textual_input)
+        x3 = GlobalAveragePooling1D()(x3)
+
+        combined = Concatenate()([x1, x2, x3])
+        z = Dense(256, activation='relu')(combined)
+        z = Dropout(0.5)(z)
+
+        value_output = Dense(1, activation='linear', name='value_output')(z)
+
+        critic_network = Model(inputs=[visual_input, auditory_input, textual_input], outputs=value_output)
+        logger.info("Multi-modal critic network built successfully.")
+        return critic_network
+
+    def preprocess_text(self, texts):
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        return pad_sequences(sequences, maxlen=self.max_seq_length)
 
     def act(self, state):
         """Selects an action based on the current policy."""
-        state = np.expand_dims(state, axis=0)
-        mean = self.actor_network(state)
+        visual_input = state['visual']
+        auditory_input = state['auditory']
+        textual_input = self.preprocess_text([state['textual']])
+        
+        mean = self.policy_model.predict([np.array([visual_input]), np.array([auditory_input]), np.array(textual_input)])
         std = tf.exp(self.log_std)
         dist = MultivariateNormalDiag(mean, std)
         action = dist.sample()
@@ -77,19 +126,22 @@ class PPOAgent:
 
     def evaluate(self, state, action):
         """Evaluates the given state-action pair."""
-        state = np.expand_dims(state, axis=0)
-        mean = self.actor_network(state)
+        visual_input = state['visual']
+        auditory_input = state['auditory']
+        textual_input = self.preprocess_text([state['textual']])
+        
+        mean = self.policy_model.predict([np.array([visual_input]), np.array([auditory_input]), np.array(textual_input)])
         std = tf.exp(self.log_std)
         dist = MultivariateNormalDiag(mean, std)
         log_prob = dist.log_prob(action)
-        value = self.critic_network(state)
+        value = self.critic_network.predict([np.array([visual_input]), np.array([auditory_input]), np.array(textual_input)])
         return log_prob[0], value[0]
 
     def update(self, states, actions, log_probs, returns, advantages):
         """Updates the policy and value networks."""
         with tf.GradientTape() as tape1, tf.GradientTape() as tape2:
             # Actor loss
-            new_log_probs = self.actor_network(states)
+            new_log_probs = self.policy_model(states)
             ratio = tf.exp(new_log_probs - log_probs)
             surr1 = ratio * advantages
             surr2 = tf.clip_by_value(ratio, 1.0 - self.clip_ratio, 1.0 + self.clip_ratio) * advantages
@@ -102,13 +154,13 @@ class PPOAgent:
             # Total loss
             total_loss = actor_loss + self.value_coefficient * critic_loss - self.entropy_coefficient * tf.reduce_mean(new_log_probs)
 
-        actor_grads = tape1.gradient(total_loss, self.actor_network.trainable_variables)
+        actor_grads = tape1.gradient(total_loss, self.policy_model.trainable_variables)
         critic_grads = tape2.gradient(total_loss, self.critic_network.trainable_variables)
 
         actor_grads, _ = tf.clip_by_global_norm(actor_grads, self.max_grad_norm)
         critic_grads, _ = tf.clip_by_global_norm(critic_grads, self.max_grad_norm)
 
-        self.actor_optimizer.apply_gradients(zip(actor_grads, self.actor_network.trainable_variables))
+        self.actor_optimizer.apply_gradients(zip(actor_grads, self.policy_model.trainable_variables))
         self.critic_optimizer.apply_gradients(zip(critic_grads, self.critic_network.trainable_variables))
 
         self.actor_losses.append(actor_loss.numpy())
@@ -203,7 +255,7 @@ class PPOAgent:
 
 def log_training_progress(agent, episode, total_episodes, total_reward):
     """Logs training progress."""
-    logger.info(f"Episode: {episode}/{total_episodes}, Epsilon: {agent.epsilon:.2f}, Total Reward: {total_reward}")
+    logger.info(f"Episode: {episode}/{total_episodes}, Total Reward: {total_reward}")
 
 def log_testing_results(agent, episode, total_episodes, total_reward):
     """Logs testing results."""
@@ -267,10 +319,11 @@ class MetaLearning:
 env = gym.make('CartPole-v1')
 transfer_learning = TransferLearning()
 meta_learning = MetaLearning()
-agent = PPOAgent(env, transfer_learning, meta_learning)
+agent = PPOAgent(env, transfer_learning=transfer_learning, meta_learning=meta_learning)
 
 # Train the agent with transfer learning and meta-learning
 agent.train(1000, transfer_learning=True, meta_learning=True)
 
 # Test the agent
 agent.test(100)
+
