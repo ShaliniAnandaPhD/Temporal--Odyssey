@@ -1,6 +1,6 @@
 # Temporal Odyssey
 
-Temporal Odyssey is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." As an agent, you will navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
+Temporal Odyssey is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." As an agent, you will navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills. This project emphasizes the multimodal nature of its agents, allowing for rich interactions and learning across various sensory inputs and outputs.
 
 ## Key Features
 
@@ -12,11 +12,12 @@ Temporal Odyssey is an immersive reinforcement learning project inspired by H.G.
 - **Interact with evolving environments:** Your actions shape the world around you.
 - **Engage with objects and characters:** Influence your surroundings through interaction.
 
-### Versatile Agent Capabilities
+### Multimodal Agent Capabilities
 - **Era-specific actions:** Perform tasks suited to each time period.
   - **Primitive past:** Navigate terrains, gather resources, craft tools, and build shelters.
   - **Present:** Trade goods and make strategic decisions.
   - **Dystopian futures:** Scavenge supplies and navigate dangers.
+- **Multisensory learning:** Utilize visual, auditory, and textual data to enhance agent decision-making and adaptability.
 
 ### Intelligent Reward System
 - **Sophisticated rewards:** Encourage exploration and survival.
