@@ -32,10 +32,13 @@ class MultiAgentEnv(gym.Env):
         Returns:
             list: List of initial observations for each agent.
         """
-        # Error: Resetting the environment might not correctly initialize states for all agents.
-        # Solution: Ensure that each agent's initial state is properly set.
-        obs = self.env.reset()
-        return [obs for _ in range(self.num_agents)]
+        try:
+            obs = self.env.reset()
+            # Ensure each agent's initial state is properly set
+            return [obs for _ in range(self.num_agents)]
+        except Exception as e:
+            logger.error(f"Error during reset: {e}")
+            raise
 
     def step(self, actions):
         """
@@ -47,18 +50,22 @@ class MultiAgentEnv(gym.Env):
         Returns:
             tuple: Observations, rewards, dones, and info for all agents.
         """
-        # Error: The environment's step function might not handle multiple actions correctly.
-        # Solution: Ensure that the step function processes each agent's action properly.
-        # Here, we assume a shared environment with a collective action
-        obs, reward, done, info = self.env.step(actions[0])
-
-        # Ensure the returned values are correctly formatted for each agent
-        return (
-            [obs for _ in range(self.num_agents)],
-            [reward for _ in range(self.num_agents)],
-            [done for _ in range(self.num_agents)],
-            [info for _ in range(self.num_agents)]
-        )
+        try:
+            # Error: The environment's step function might not handle multiple actions correctly.
+            # Solution: Ensure that the step function processes each agent's action properly.
+            # Here, we assume a shared environment with a collective action
+            obs, reward, done, info = self.env.step(actions[0])
+            
+            # Ensure the returned values are correctly formatted for each agent
+            return (
+                [obs for _ in range(self.num_agents)],
+                [reward for _ in range(self.num_agents)],
+                [done for _ in range(self.num_agents)],
+                [info for _ in range(self.num_agents)]
+            )
+        except Exception as e:
+            logger.error(f"Error during step: {e}")
+            raise
 
 def train_multi_agent(env, agents, num_episodes):
     """
