@@ -8,20 +8,24 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MultiAgentEnv(gym.Env):
-    def __init__(self, env_name, num_agents):
+    def __init__(self, env_name, num_agents, reward_scheme=None, observation_space=None):
         """
         Initialize the MultiAgentEnv wrapper.
 
         Args:
             env_name (str): Name of the single-agent environment to wrap.
             num_agents (int): Number of agents in the environment.
+            reward_scheme (dict): Dictionary defining reward schemes for agents.
+            observation_space (spaces.Space): Observation space for partial observability.
         """
         self.env = gym.make(env_name)
         self.num_agents = num_agents
+        self.reward_scheme = reward_scheme
+        self.observation_space = observation_space if observation_space else self.env.observation_space
 
         # Define action and observation spaces as tuples of the single-agent spaces
         self.action_space = spaces.Tuple([self.env.action_space for _ in range(num_agents)])
-        self.observation_space = spaces.Tuple([self.env.observation_space for _ in range(num_agents)])
+        self.observation_space = spaces.Tuple([self.observation_space for _ in range(num_agents)])
 
         logger.info(f"MultiAgentEnv initialized with {num_agents} agents.")
 
@@ -34,7 +38,6 @@ class MultiAgentEnv(gym.Env):
         """
         try:
             obs = self.env.reset()
-            # Ensure each agent's initial state is properly set
             return [obs for _ in range(self.num_agents)]
         except Exception as e:
             logger.error(f"Error during reset: {e}")
@@ -51,21 +54,60 @@ class MultiAgentEnv(gym.Env):
             tuple: Observations, rewards, dones, and info for all agents.
         """
         try:
-            # Error: The environment's step function might not handle multiple actions correctly.
-            # Solution: Ensure that the step function processes each agent's action properly.
-            # Here, we assume a shared environment with a collective action
             obs, reward, done, info = self.env.step(actions[0])
             
-            # Ensure the returned values are correctly formatted for each agent
+            # Process rewards for each agent based on reward_scheme if provided
+            rewards = self._process_rewards(reward)
+
             return (
                 [obs for _ in range(self.num_agents)],
-                [reward for _ in range(self.num_agents)],
+                rewards,
                 [done for _ in range(self.num_agents)],
                 [info for _ in range(self.num_agents)]
             )
         except Exception as e:
             logger.error(f"Error during step: {e}")
             raise
+
+    def _process_rewards(self, base_reward):
+        """
+        Process rewards for each agent based on reward_scheme.
+
+        Args:
+            base_reward (float): Base reward from the environment.
+
+        Returns:
+            list: List of rewards for each agent.
+        """
+        if self.reward_scheme:
+            return [self.reward_scheme.get(agent, base_reward) for agent in range(self.num_agents)]
+        return [base_reward for _ in range(self.num_agents)]
+
+    def send_message(self, sender_id, receiver_id, message):
+        """
+        Send a message from one agent to another.
+
+        Args:
+            sender_id (int): ID of the sending agent.
+            receiver_id (int): ID of the receiving agent.
+            message (str): Message content.
+        """
+        logger.info(f"Agent {sender_id} sent message to Agent {receiver_id}: {message}")
+        # Implement message sending logic here
+
+    def receive_message(self, receiver_id):
+        """
+        Receive a message for an agent.
+
+        Args:
+            receiver_id (int): ID of the receiving agent.
+
+        Returns:
+            str: Received message content.
+        """
+        # Implement message receiving logic here
+        logger.info(f"Agent {receiver_id} received a message.")
+        return "Sample message"
 
 def train_multi_agent(env, agents, num_episodes):
     """
@@ -116,4 +158,5 @@ if __name__ == "__main__":
     agents = [HybridLearningAgent(env) for _ in range(num_agents)]
 
     train_multi_agent(env, agents, num_episodes)
+
 
