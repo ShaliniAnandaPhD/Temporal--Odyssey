@@ -1,119 +1,167 @@
 import numpy as np
-import tensorflow as tf
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import multilabel_confusion_matrix, classification_report
 import logging
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report, confusion_matrix
-from tensorflow.keras.metrics import AUC, Precision, Recall
+import seaborn as sns
+import pandas as pd
+from scipy import stats
+from sklearn.metrics import confusion_matrix
+import mlflow
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class MultiModalMetrics:
+class MultimodalMetrics:
     def __init__(self):
-        self.accuracy = tf.keras.metrics.CategoricalAccuracy(name='accuracy')
-        self.loss = tf.keras.metrics.Mean(name='loss')
-        self.auc = AUC(name='auc')
-        self.precision = Precision(name='precision')
-        self.recall = Recall(name='recall')
-        self.true_labels = []
-        self.predicted_labels = []
+        self.results = {}
+        logger.info("MultimodalMetrics initialized.")
 
-    def update_metrics(self, y_true, y_pred, loss):
-        """Updates the metrics with the latest batch of predictions and labels."""
-        self.accuracy.update_state(y_true, y_pred)
-        self.loss.update_state(loss)
-        self.auc.update_state(y_true, y_pred)
-        self.precision.update_state(y_true, y_pred)
-        self.recall.update_state(y_true, y_pred)
-        self.true_labels.extend(np.argmax(y_true, axis=1))
-        self.predicted_labels.extend(np.argmax(y_pred, axis=1))
-        logger.info(f"Metrics updated: loss={loss}, accuracy={self.accuracy.result().numpy()}")
+    def update(self, true_labels, pred_labels, average='weighted', prefix=''):
+        """
+        Update metrics with new predictions.
 
-    def reset_metrics(self):
-        """Resets the metrics to their initial state."""
-        self.accuracy.reset_states()
-        self.loss.reset_states()
-        self.auc.reset_states()
-        self.precision.reset_states()
-        self.recall.reset_states()
-        self.true_labels = []
-        self.predicted_labels = []
+        Args:
+            true_labels (array-like): True labels.
+            pred_labels (array-like): Predicted labels.
+            average (str): Averaging method for metrics.
+            prefix (str): Prefix for metric keys.
+        """
+        self.results[prefix + 'accuracy'] = accuracy_score(true_labels, pred_labels)
+        self.results[prefix + 'precision'] = precision_score(true_labels, pred_labels, average=average)
+        self.results[prefix + 'recall'] = recall_score(true_labels, pred_labels, average=average)
+        self.results[prefix + 'f1_score'] = f1_score(true_labels, pred_labels, average=average)
+        
+        if len(np.unique(true_labels)) == 2:  # Binary classification
+            self.results[prefix + 'roc_auc'] = roc_auc_score(true_labels, pred_labels)
+        
+        logger.info(f"Metrics updated: {self.results}")
 
-    def log_metrics(self):
-        """Logs the current values of the metrics."""
-        logger.info(f"Loss: {self.loss.result().numpy()}")
-        logger.info(f"Accuracy: {self.accuracy.result().numpy()}")
-        logger.info(f"AUC: {self.auc.result().numpy()}")
-        logger.info(f"Precision: {self.precision.result().numpy()}")
-        logger.info(f"Recall: {self.recall.result().numpy()}")
+    def update_multilabel(self, true_labels, pred_labels, average='macro', prefix=''):
+        """
+        Update metrics for multi-label classification.
 
-    def plot_confusion_matrix(self):
-        """Plots the confusion matrix of the true and predicted labels."""
-        cm = confusion_matrix(self.true_labels, self.predicted_labels)
-        plt.figure(figsize=(10, 7))
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title('Confusion Matrix')
-        plt.colorbar()
-        tick_marks = np.arange(len(set(self.true_labels)))
-        plt.xticks(tick_marks, tick_marks, rotation=45)
-        plt.yticks(tick_marks, tick_marks)
-        plt.ylabel('True Label')
-        plt.xlabel('Predicted Label')
+        Args:
+            true_labels (array-like): True labels.
+            pred_labels (array-like): Predicted labels.
+            average (str): Averaging method for metrics.
+            prefix (str): Prefix for metric keys.
+        """
+        self.results[prefix + 'accuracy'] = accuracy_score(true_labels, pred_labels)
+        self.results[prefix + 'precision'] = precision_score(true_labels, pred_labels, average=average)
+        self.results[prefix + 'recall'] = recall_score(true_labels, pred_labels, average=average)
+        self.results[prefix + 'f1_score'] = f1_score(true_labels, pred_labels, average=average)
+        self.results[prefix + 'classification_report'] = classification_report(true_labels, pred_labels)
+        
+        logger.info(f"Multi-label metrics updated: {self.results}")
+
+    def update_confusion_matrix(self, true_labels, pred_labels, labels, prefix=''):
+        """
+        Update confusion matrix for the predictions.
+
+        Args:
+            true_labels (array-like): True labels.
+            pred_labels (array-like): Predicted labels.
+            labels (list): List of labels.
+            prefix (str): Prefix for metric keys.
+        """
+        self.results[prefix + 'confusion_matrix'] = confusion_matrix(true_labels, pred_labels, labels=labels)
+        logger.info(f"Confusion matrix updated for {prefix}")
+
+    def compute_weighted_metrics(self, true_labels, pred_labels, weights, prefix=''):
+        """
+        Compute weighted metrics to account for class imbalance.
+
+        Args:
+            true_labels (array-like): True labels.
+            pred_labels (array-like): Predicted labels.
+            weights (array-like): Weights for each class.
+            prefix (str): Prefix for metric keys.
+        """
+        self.results[prefix + 'weighted_accuracy'] = np.average(accuracy_score(true_labels, pred_labels), weights=weights)
+        self.results[prefix + 'weighted_precision'] = np.average(precision_score(true_labels, pred_labels, average=None), weights=weights)
+        self.results[prefix + 'weighted_recall'] = np.average(recall_score(true_labels, pred_labels, average=None), weights=weights)
+        self.results[prefix + 'weighted_f1_score'] = np.average(f1_score(true_labels, pred_labels, average=None), weights=weights)
+        
+        logger.info(f"Weighted metrics updated: {self.results}")
+
+    def visualize_metrics(self):
+        """
+        Visualize the metrics.
+        """
+        df = pd.DataFrame.from_dict(self.results, orient='index', columns=['Value'])
+        df.plot(kind='bar', figsize=(12, 6))
+        plt.title('Performance Metrics')
+        plt.xlabel('Metrics')
+        plt.ylabel('Values')
         plt.show()
-        logger.info("Confusion matrix plotted.")
+        logger.info("Metrics visualized.")
 
-    def classification_report(self):
-        """Generates a classification report."""
-        report = classification_report(self.true_labels, self.predicted_labels, target_names=[str(i) for i in range(len(set(self.true_labels)))])
-        logger.info(f"\nClassification Report:\n{report}")
+    def visualize_confusion_matrix(self, prefix=''):
+        """
+        Visualize the confusion matrix.
 
-    def save_metrics(self, filepath):
-        """Saves the metrics to a file."""
-        try:
-            metrics_data = {
-                'accuracy': self.accuracy.result().numpy(),
-                'loss': self.loss.result().numpy(),
-                'auc': self.auc.result().numpy(),
-                'precision': self.precision.result().numpy(),
-                'recall': self.recall.result().numpy(),
-                'true_labels': self.true_labels,
-                'predicted_labels': self.predicted_labels
-            }
-            np.save(filepath, metrics_data)
-            logger.info(f"Metrics saved to {filepath}")
-        except Exception as e:
-            logger.error(f"Failed to save metrics: {e}")
+        Args:
+            prefix (str): Prefix for metric keys.
+        """
+        cm = self.results.get(prefix + 'confusion_matrix')
+        if cm is not None:
+            plt.figure(figsize=(10, 7))
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+            plt.title(f'Confusion Matrix {prefix}')
+            plt.xlabel('Predicted')
+            plt.ylabel('Actual')
+            plt.show()
+            logger.info("Confusion matrix visualized.")
 
-    def load_metrics(self, filepath):
-        """Loads the metrics from a file."""
-        try:
-            metrics_data = np.load(filepath, allow_pickle=True).item()
-            self.accuracy.update_state(metrics_data['accuracy'])
-            self.loss.update_state(metrics_data['loss'])
-            self.auc.update_state(metrics_data['auc'])
-            self.precision.update_state(metrics_data['precision'])
-            self.recall.update_state(metrics_data['recall'])
-            self.true_labels = metrics_data['true_labels']
-            self.predicted_labels = metrics_data['predicted_labels']
-            logger.info(f"Metrics loaded from {filepath}")
-        except Exception as e:
-            logger.error(f"Failed to load metrics: {e}")
+    def statistical_test(self, metric1, metric2, test='t-test'):
+        """
+        Perform statistical tests to compare two sets of metrics.
 
+        Args:
+            metric1 (array-like): First set of metrics.
+            metric2 (array-like): Second set of metrics.
+            test (str): Type of statistical test ('t-test' or 'anova').
+
+        Returns:
+            float: p-value from the statistical test.
+        """
+        if test == 't-test':
+            _, p_value = stats.ttest_ind(metric1, metric2)
+        elif test == 'anova':
+            _, p_value = stats.f_oneway(metric1, metric2)
+        else:
+            raise ValueError("Invalid test type. Choose 't-test' or 'anova'.")
+        
+        logger.info(f"Statistical test ({test}) performed with p-value: {p_value}")
+        return p_value
+
+    def log_to_mlflow(self):
+        """
+        Log the metrics to MLflow.
+        """
+        for key, value in self.results.items():
+            if isinstance(value, (int, float)):
+                mlflow.log_metric(key, value)
+            elif isinstance(value, np.ndarray):
+                mlflow.log_artifact(pd.DataFrame(value).to_csv(index=False), f"{key}.csv")
+            else:
+                mlflow.log_param(key, value)
+        logger.info("Metrics logged to MLflow.")
 
 # Example usage
 if __name__ == "__main__":
-    # Simulated example data
-    y_true = np.random.randint(0, 2, size=(100, 3))
-    y_pred = np.random.rand(100, 3)
-    loss = np.random.rand(1)
+    true_labels = np.random.randint(0, 2, 100)
+    pred_labels = np.random.randint(0, 2, 100)
+    weights = np.random.rand(2)
 
+    mm_metrics = MultimodalMetrics()
+    mm_metrics.update(true_labels, pred_labels)
+    mm_metrics.update_confusion_matrix(true_labels, pred_labels, labels=[0, 1])
+    mm_metrics.compute_weighted_metrics(true_labels, pred_labels, weights)
+    mm_metrics.visualize_metrics()
+    mm_metrics.visualize_confusion_matrix()
+    mm_metrics.statistical_test(true_labels, pred_labels)
+    mm_metrics.log_to_mlflow()
 
-  
-    metrics = MultiModalMetrics()
-    metrics.update_metrics(y_true, y_pred, loss)
-    metrics.log_metrics()
-    metrics.plot_confusion_matrix()
-    metrics.classification_report()
-    metrics.save_metrics('metrics.npy')
-    metrics.load_metrics('metrics.npy')
