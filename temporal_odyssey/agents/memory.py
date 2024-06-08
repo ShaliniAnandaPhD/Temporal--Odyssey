@@ -1,88 +1,93 @@
-class Memory:
-    def __init__(self, capacity=100):
-        """
-        Initialize the Memory class.
+import numpy as np
+from collections import deque
 
-        Parameters:
-        capacity (int): The maximum number of memories to store. Default is 100.
+class PrioritizedReplayBuffer:
+    def __init__(self, capacity, alpha):
+        """
+        Initialize the Prioritized Replay Buffer.
+
+        Args:
+            capacity (int): Maximum number of experiences to store in the buffer.
+            alpha (float): Priority exponent to adjust the level of prioritization.
         """
         self.capacity = capacity
-        self.memory = []
-        print(f"Memory initialized with capacity: {self.capacity}")
+        self.buffer = deque(maxlen=capacity)
+        self.priorities = deque(maxlen=capacity)
+        self.alpha = alpha
 
-    def remember(self, event):
+    def add(self, state, action, reward, next_state, done):
         """
-        Store an event in memory. If memory is full, the oldest event is removed.
+        Add a new experience to the buffer with maximum priority.
 
-        Parameters:
-        event (dict): A dictionary representing the event to remember.
+        Args:
+            state: The current state.
+            action: The action taken.
+            reward: The reward received.
+            next_state: The next state.
+            done: Whether the episode is done.
         """
-        if len(self.memory) >= self.capacity:
-            self.memory.pop(0)  # Remove the oldest memory
-        self.memory.append(event)
-        print(f"Event remembered: {event}")
+        max_priority = max(self.priorities, default=1.0)
+        self.buffer.append((state, action, reward, next_state, done))
+        self.priorities.append(max_priority)
 
-    def recall(self, criteria):
+    def sample(self, batch_size, beta):
         """
-        Recall events from memory that match the given criteria.
+        Sample a batch of experiences from the buffer based on their priority.
 
-        Parameters:
-        criteria (dict): A dictionary with keys and values to match in the memory.
+        Args:
+            batch_size (int): Number of experiences to sample.
+            beta (float): Importance-sampling exponent to adjust the bias.
 
         Returns:
-        list: A list of remembered events that match the criteria.
+            tuple: Sampled experiences, importance weights, and sampled indices.
         """
-        recalled_events = [event for event in self.memory if all(event.get(k) == v for k, v in criteria.items())]
-        print(f"Recalled events matching criteria {criteria}: {recalled_events}")
-        return recalled_events
+        if len(self.buffer) == 0:
+            raise ValueError("The buffer is empty.")
 
-    def forget(self, criteria):
+        priorities = np.array(self.priorities, dtype=np.float32) ** self.alpha
+        probabilities = priorities / np.sum(priorities)
+
+        indices = np.random.choice(len(self.buffer), batch_size, p=probabilities)
+        samples = [self.buffer[idx] for idx in indices]
+
+        importance_weights = (len(self.buffer) * probabilities[indices]) ** (-beta)
+        importance_weights /= np.max(importance_weights)
+
+        states, actions, rewards, next_states, dones = zip(*samples)
+
+        return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(dones), importance_weights, indices
+
+    def update_priorities(self, indices, priorities):
         """
-        Forget events from memory that match the given criteria.
+        Update the priorities of sampled experiences.
 
-        Parameters:
-        criteria (dict): A dictionary with keys and values to match in the memory.
+        Args:
+            indices (list): List of sampled indices.
+            priorities (list): List of updated priorities.
         """
-        self.memory = [event for event in self.memory if not all(event.get(k) == v for k, v in criteria.items())]
-        print(f"Forgot events matching criteria {criteria}")
+        for idx, priority in zip(indices, priorities):
+            self.priorities[idx] = priority
 
-    def list_memory(self):
-        """
-        List all events currently stored in memory.
-
-        Returns:
-        list: A list of all remembered events.
-        """
-        print(f"Current memory: {self.memory}")
-        return self.memory
-
-# Example usage
+# Example usage of PrioritizedReplayBuffer
 if __name__ == "__main__":
-    agent_memory = Memory(capacity=5)
+    buffer = PrioritizedReplayBuffer(capacity=1000, alpha=0.6)
 
-    # Remember some events
-    agent_memory.remember({"type": "interaction", "npc": "Bob", "outcome": "positive"})
-    agent_memory.remember({"type": "interaction", "npc": "Alice", "outcome": "negative"})
-    agent_memory.remember({"type": "discovery", "location": "forest", "item": "herb"})
-    agent_memory.remember({"type": "battle", "enemy": "goblin", "outcome": "win"})
-    agent_memory.remember({"type": "interaction", "npc": "Charlie", "outcome": "neutral"})
-    
-    # List current memory
-    agent_memory.list_memory()
+    # Simulate adding some experiences
+    for _ in range(10):
+        state = np.random.rand(4)
+        action = np.random.randint(4)
+        reward = np.random.rand()
+        next_state = np.random.rand(4)
+        done = np.random.randint(2)
+        buffer.add(state, action, reward, next_state, done)
 
-    # Recall specific events
-    agent_memory.recall({"type": "interaction", "npc": "Bob"})
-    agent_memory.recall({"outcome": "win"})
+    # Simulate sampling from the buffer
+    states, actions, rewards, next_states, dones, weights, indices = buffer.sample(batch_size=4, beta=0.4)
+    print("Sampled states:", states)
+    print("Importance weights:", weights)
 
-    # Forget specific events
-    agent_memory.forget({"type": "interaction", "npc": "Alice"})
+    # Simulate updating priorities
+    new_priorities = np.random.rand(4)
+    buffer.update_priorities(indices, new_priorities)
+    print("Updated priorities:", [buffer.priorities[idx] for idx in indices])
 
-    # List current memory after forgetting some events
-    agent_memory.list_memory()
-
-    # Add more events to test memory capacity
-    agent_memory.remember({"type": "exploration", "location": "cave", "finding": "treasure"})
-    agent_memory.remember({"type": "interaction", "npc": "Daisy", "outcome": "positive"})
-
-    # List current memory to see capacity handling
-    agent_memory.list_memory()
