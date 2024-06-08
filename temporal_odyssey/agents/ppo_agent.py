@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Dropout, Concatenate, Embedding, GlobalAveragePooling1D, MultiHeadAttention, LayerNormalization, Add
+from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Dropout, Concatenate, Embedding, GlobalAveragePooling1D
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -47,6 +47,15 @@ class PPOAgent:
 
         # Log standard deviation for action distribution
         self.log_std = tf.Variable(np.zeros(self.env.action_space.shape), dtype=tf.float32)
+
+        # Exploration strategies
+        self.exploration_rate = 1.0
+        self.exploration_decay = 0.995
+        self.exploration_min = 0.01
+
+        # Possible Error: The exploration rate might decay too quickly or too slowly.
+        # Solution: Adjust the values of `exploration_decay` and `exploration_min` based on the specific requirements of your problem.
+        #           Experiment with different values to find a balance between exploration and exploitation.
 
     def _build_actor_network(self):
         """Builds the actor network model with multi-modal inputs."""
@@ -122,6 +131,14 @@ class PPOAgent:
         action = dist.sample()
         log_prob = dist.log_prob(action)
         action = tf.clip_by_value(action, self.env.action_space.low, self.env.action_space.high)
+
+        # Exploration strategies: Decay exploration rate
+        if np.random.rand() < self.exploration_rate:
+            # Choose a random action for exploration
+            action = np.random.uniform(self.env.action_space.low, self.env.action_space.high, size=self.env.action_space.shape)
+        self.exploration_rate *= self.exploration_decay
+        self.exploration_rate = max(self.exploration_min, self.exploration_rate)
+
         return action[0], log_prob[0]
 
     def evaluate(self, state, action):
@@ -326,4 +343,3 @@ agent.train(1000, transfer_learning=True, meta_learning=True)
 
 # Test the agent
 agent.test(100)
-
