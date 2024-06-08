@@ -1,162 +1,204 @@
-import logging
-import csv
 import os
+import json
+import gzip
+import numpy as np
+import pandas as pd
+import logging
+import matplotlib.pyplot as plt
 from datetime import datetime
 from collections import defaultdict
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class Telemetry:
-    def __init__(self, filepath="telemetry.csv"):
+    def __init__(self, log_dir="logs", compress=True):
         """
         Initialize the Telemetry class.
 
-        Parameters:
-        filepath (str): The path to the CSV file where telemetry data will be stored.
+        Args:
+            log_dir (str): Directory to save telemetry logs.
+            compress (bool): Whether to compress the telemetry data.
         """
-        self.filepath = filepath
-        self.fields = ["timestamp", "episode", "step", "state", "action", "reward", "next_state", "done"]
+        self.log_dir = log_dir
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.compress = compress
         self.data = defaultdict(list)
-        self._initialize_file()
+        logger.info("Telemetry initialized.")
 
-    def _initialize_file(self):
+    def log(self, agent_id, episode, step, reward, state, action, done):
         """
-        Initialize the CSV file and write the header if the file does not exist.
-        """
-        if not os.path.exists(self.filepath):
-            try:
-                with open(self.filepath, mode='w', newline='') as file:
-                    writer = csv.DictWriter(file, fieldnames=self.fields)
-                    writer.writeheader()
-                    logger.info(f"Telemetry file '{self.filepath}' created with header.")
-            except Exception as e:
-                logger.error(f"Failed to create telemetry file: {e}")
+        Log telemetry data for a single agent.
 
-    def record(self, episode, step, state, action, reward, next_state, done):
+        Args:
+            agent_id (str): Identifier for the agent.
+            episode (int): Episode number.
+            step (int): Step number within the episode.
+            reward (float): Reward received at this step.
+            state (array): Current state.
+            action (int): Action taken.
+            done (bool): Whether the episode is done.
         """
-        Record telemetry data for each step.
-
-        Parameters:
-        episode (int): The current episode number.
-        step (int): The current step number.
-        state (object): The current state of the environment.
-        action (int): The action taken by the agent.
-        reward (float): The reward received after taking the action.
-        next_state (object): The next state of the environment.
-        done (bool): Whether the episode has ended.
-        """
-        timestamp = datetime.now().isoformat()
-        record = {
-            "timestamp": timestamp,
+        self.data[agent_id].append({
             "episode": episode,
             "step": step,
-            "state": str(state),
-            "action": action,
             "reward": reward,
-            "next_state": str(next_state),
+            "state": state.tolist(),
+            "action": action,
             "done": done
-        }
-        for key, value in record.items():
-            self.data[key].append(value)
-        logger.info(f"Telemetry data recorded for episode {episode}, step {step}.")
+        })
+        logger.debug(f"Logged data for agent {agent_id}, episode {episode}, step {step}.")
 
     def save(self):
         """
-        Save the recorded telemetry data to the CSV file.
+        Save the telemetry data to disk.
         """
-        try:
-            with open(self.filepath, mode='a', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=self.fields)
-                for i in range(len(self.data["timestamp"])):
-                    row = {field: self.data[field][i] for field in self.fields}
-                    writer.writerow(row)
-            logger.info(f"Telemetry data saved to '{self.filepath}'.")
-            self._clear_data()
-        except Exception as e:
-            logger.error(f"Failed to save telemetry data: {e}")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"telemetry_{timestamp}.json"
+        filepath = os.path.join(self.log_dir, filename)
+        if self.compress:
+            filepath += ".gz"
+            with gzip.open(filepath, 'wt', encoding='utf-8') as f:
+                json.dump(self.data, f)
+        else:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.data, f)
+        logger.info(f"Telemetry data saved to {filepath}.")
 
-    def _clear_data(self):
+    def load(self, filepath):
         """
-        Clear the in-memory telemetry data.
-        """
-        self.data = defaultdict(list)
-        logger.info("In-memory telemetry data cleared.")
+        Load telemetry data from disk.
 
-    def load(self):
+        Args:
+            filepath (str): Path to the telemetry log file.
         """
-        Load telemetry data from the CSV file.
+        if filepath.endswith(".gz"):
+            with gzip.open(filepath, 'rt', encoding='utf-8') as f:
+                self.data = json.load(f)
+        else:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                self.data = json.load(f)
+        logger.info(f"Telemetry data loaded from {filepath}.")
+
+    def visualize(self, agent_id=None):
+        """
+        Visualize telemetry data for the specified agent.
+
+        Args:
+            agent_id (str): Identifier for the agent. If None, visualize data for all agents.
+        """
+        if agent_id:
+            self._plot_agent_data(agent_id)
+        else:
+            for agent in self.data.keys():
+                self._plot_agent_data(agent)
+
+    def _plot_agent_data(self, agent_id):
+        """
+        Plot telemetry data for a single agent.
+
+        Args:
+            agent_id (str): Identifier for the agent.
+        """
+        agent_data = self.data[agent_id]
+        df = pd.DataFrame(agent_data)
+        
+        plt.figure(figsize=(12, 6))
+        
+        plt.subplot(2, 1, 1)
+        plt.plot(df['step'], df['reward'], label='Reward')
+        plt.title(f'Agent {agent_id} - Reward per Step')
+        plt.xlabel('Step')
+        plt.ylabel('Reward')
+        plt.legend()
+
+        plt.subplot(2, 1, 2)
+        plt.plot(df['step'], df['done'].astype(int), label='Done')
+        plt.title(f'Agent {agent_id} - Done per Step')
+        plt.xlabel('Step')
+        plt.ylabel('Done')
+        plt.legend()
+
+        plt.tight_layout()
+        plt.show()
+
+    def aggregate_data(self, agent_id=None):
+        """
+        Aggregate telemetry data across multiple episodes or runs.
+
+        Args:
+            agent_id (str): Identifier for the agent. If None, aggregate data for all agents.
 
         Returns:
-        list of dict: The list of telemetry data records.
+            DataFrame: Aggregated telemetry data.
         """
-        try:
-            with open(self.filepath, mode='r', newline='') as file:
-                reader = csv.DictReader(file)
-                data = list(reader)
-                logger.info(f"Telemetry data loaded from '{self.filepath}'.")
-                return data
-        except Exception as e:
-            logger.error(f"Failed to load telemetry data: {e}")
-            return []
+        if agent_id:
+            return self._aggregate_agent_data(agent_id)
+        else:
+            aggregated_data = pd.DataFrame()
+            for agent in self.data.keys():
+                agent_data = self._aggregate_agent_data(agent)
+                agent_data['agent_id'] = agent
+                aggregated_data = pd.concat([aggregated_data, agent_data])
+            return aggregated_data
 
-    def get_statistics(self):
+    def _aggregate_agent_data(self, agent_id):
         """
-        Calculate and log basic statistics from the telemetry data.
+        Aggregate telemetry data for a single agent.
+
+        Args:
+            agent_id (str): Identifier for the agent.
 
         Returns:
-        dict: A dictionary containing average reward and step count per episode.
+            DataFrame: Aggregated telemetry data for the agent.
         """
-        try:
-            data = self.load()
-            if not data:
-                return {}
+        agent_data = self.data[agent_id]
+        df = pd.DataFrame(agent_data)
+        aggregation = {
+            'reward': ['sum', 'mean', 'std'],
+            'done': 'sum'
+        }
+        aggregated_df = df.groupby('episode').agg(aggregation)
+        aggregated_df.columns = ['_'.join(col).strip() for col in aggregated_df.columns.values]
+        return aggregated_df
 
-            episode_rewards = defaultdict(list)
-            episode_steps = defaultdict(int)
+    def filter_data(self, agent_id, criteria):
+        """
+        Filter telemetry data based on specific criteria.
 
-            for row in data:
-                episode = int(row["episode"])
-                reward = float(row["reward"])
-                episode_rewards[episode].append(reward)
-                episode_steps[episode] += 1
+        Args:
+            agent_id (str): Identifier for the agent.
+            criteria (dict): Dictionary containing filter criteria.
 
-            avg_rewards = {ep: sum(rewards)/len(rewards) for ep, rewards in episode_rewards.items()}
-            avg_steps = {ep: steps for ep, steps in episode_steps.items()}
+        Returns:
+            DataFrame: Filtered telemetry data.
+        """
+        agent_data = self.data[agent_id]
+        df = pd.DataFrame(agent_data)
+        query = ' & '.join([f"{key} {value}" for key, value in criteria.items()])
+        filtered_df = df.query(query)
+        return filtered_df
 
-            statistics = {
-                "average_rewards": avg_rewards,
-                "average_steps": avg_steps
-            }
-            logger.info(f"Telemetry statistics calculated: {statistics}")
-            return statistics
-        except Exception as e:
-            logger.error(f"Failed to calculate telemetry statistics: {e}")
-            return {}
+    def real_time_monitoring(self, agent_id):
+        """
+        Real-time monitoring of the agent's performance.
+
+        Args:
+            agent_id (str): Identifier for the agent.
+        """
+        raise NotImplementedError("Real-time monitoring is not yet implemented.")
 
 # Example usage
 if __name__ == "__main__":
     telemetry = Telemetry()
-
-    # Simulate recording telemetry data
-    for episode in range(10):
-        for step in range(50):
-            state = {"position": (step, step)}
-            action = step % 4
-            reward = step
-            next_state = {"position": (step + 1, step + 1)}
-            done = step == 49
-            telemetry.record(episode, step, state, action, reward, next_state, done)
-
-    # Save the telemetry data
+    telemetry.log("agent_1", 1, 1, 1.0, np.array([0.1, 0.2, 0.3]), 0, False)
+    telemetry.log("agent_1", 1, 2, 1.0, np.array([0.1, 0.2, 0.3]), 1, True)
     telemetry.save()
+    telemetry.load("logs/telemetry_20211010_123456.json.gz")
+    telemetry.visualize("agent_1")
+    aggregated_data = telemetry.aggregate_data("agent_1")
+    print(aggregated_data)
+    filtered_data = telemetry.filter_data("agent_1", {"reward": ">0.5"})
+    print(filtered_data)
 
-    # Load the telemetry data
-    data = telemetry.load()
-    print(data)
-
-    # Get statistics from the telemetry data
-    statistics = telemetry.get_statistics()
-    print(statistics)
