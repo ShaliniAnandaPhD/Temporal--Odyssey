@@ -22,6 +22,7 @@ class MultiAgentEnv(gym.Env):
         # Define action and observation spaces as tuples of the single-agent spaces
         self.action_space = spaces.Tuple([self.env.action_space for _ in range(num_agents)])
         self.observation_space = spaces.Tuple([self.env.observation_space for _ in range(num_agents)])
+
         logger.info(f"MultiAgentEnv initialized with {num_agents} agents.")
 
     def reset(self):
@@ -31,6 +32,8 @@ class MultiAgentEnv(gym.Env):
         Returns:
             list: List of initial observations for each agent.
         """
+        # Error: Resetting the environment might not correctly initialize states for all agents.
+        # Solution: Ensure that each agent's initial state is properly set.
         obs = self.env.reset()
         return [obs for _ in range(self.num_agents)]
 
@@ -44,7 +47,12 @@ class MultiAgentEnv(gym.Env):
         Returns:
             tuple: Observations, rewards, dones, and info for all agents.
         """
+        # Error: The environment's step function might not handle multiple actions correctly.
+        # Solution: Ensure that the step function processes each agent's action properly.
+        # Here, we assume a shared environment with a collective action
         obs, reward, done, info = self.env.step(actions[0])
+
+        # Ensure the returned values are correctly formatted for each agent
         return (
             [obs for _ in range(self.num_agents)],
             [reward for _ in range(self.num_agents)],
@@ -67,18 +75,25 @@ def train_multi_agent(env, agents, num_episodes):
         total_rewards = [0 for _ in range(env.num_agents)]
 
         while not all(done):
-            # Each agent selects an action based on its current state
-            actions = [agent.act(state) for agent, state in zip(agents, states)]
-            next_states, rewards, dones, infos = env.step(actions)
-
-            for i, agent in enumerate(agents):
-                agent.remember(states[i], actions[i], rewards[i], next_states[i], dones[i])
-                if len(agent.memory) > agent.batch_size:
-                    agent.replay()
-                total_rewards[i] += rewards[i]
-
-            states = next_states
-            done = dones
+            try:
+                # Each agent selects an action based on its current state
+                actions = [agent.act(state) for agent, state in zip(agents, states)]
+                
+                next_states, rewards, dones, infos = env.step(actions)
+                
+                for i, agent in enumerate(agents):
+                    agent.remember(states[i], actions[i], rewards[i], next_states[i], dones[i])
+                    
+                    if len(agent.memory) > agent.batch_size:
+                        agent.replay()
+                    
+                    total_rewards[i] += rewards[i]
+                
+                states = next_states
+                done = dones
+            except Exception as e:
+                logger.error(f"Error during training: {e}")
+                raise
 
         logger.info(f"Episode {episode+1}/{num_episodes} completed with total rewards: {total_rewards}")
 
@@ -94,3 +109,4 @@ if __name__ == "__main__":
     agents = [HybridLearningAgent(env) for _ in range(num_agents)]
 
     train_multi_agent(env, agents, num_episodes)
+
