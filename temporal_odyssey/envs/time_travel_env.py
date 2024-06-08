@@ -50,13 +50,15 @@ class TimeTravelEnv:
         Returns:
         tuple: The new state, reward, and done flag.
         """
-        # Error: Step logic may not properly update the state or calculate rewards.
-        # Solution: Implement detailed logic to update state based on action and calculate appropriate rewards.
-        self.current_state = self._update_state(action)
-        reward = self._calculate_reward(self.current_state)
-        done = self._check_done(self.current_state)
-        logger.info(f"Step taken with action {action}: reward={reward}, done={done}")
-        return self.current_state, reward, done
+        try:
+            self.current_state = self._update_state(action)
+            reward = self._calculate_reward(self.current_state)
+            done = self._check_done(self.current_state)
+            logger.info(f"Step taken with action {action}: reward={reward}, done={done}")
+            return self.current_state, reward, done
+        except Exception as e:
+            logger.error(f"Error during step: {e}")
+            raise
 
     def _get_initial_state(self):
         """
@@ -65,17 +67,19 @@ class TimeTravelEnv:
         Returns:
         dict: The initial state containing visual, auditory, and textual data.
         """
-        # Error: Initial state may not capture all required data.
-        # Solution: Ensure that initial state includes valid visual, auditory, and textual data.
-        initial_state = {
-            'visual': self._capture_visual_input(),
-            'auditory': self._capture_auditory_input(),
-            'textual': self._capture_textual_input(),
-            'era': 'Medieval',  # Example additional information
-            'location': 'Castle'  # Example additional information
-        }
-        logger.info("Initial state captured.")
-        return initial_state
+        try:
+            initial_state = {
+                'visual': self._capture_visual_input(),
+                'auditory': self._capture_auditory_input(),
+                'textual': self._capture_textual_input(),
+                'era': 'Medieval',  # Example additional information
+                'location': 'Castle'  # Example additional information
+            }
+            logger.info("Initial state captured.")
+            return initial_state
+        except Exception as e:
+            logger.error(f"Error capturing initial state: {e}")
+            raise
 
     def _update_state(self, action):
         """
@@ -87,17 +91,19 @@ class TimeTravelEnv:
         Returns:
         dict: The updated state containing visual, auditory, and textual data.
         """
-        # Error: State update logic may not properly reflect action's effects.
-        # Solution: Implement detailed state update logic that correctly modifies state based on action.
-        new_state = {
-            'visual': self._capture_visual_input(),
-            'auditory': self._capture_auditory_input(),
-            'textual': self._capture_textual_input(),
-            'era': self.current_state.get('era', 'Unknown'),  # Maintain era context
-            'location': self.current_state.get('location', 'Unknown')  # Maintain location context
-        }
-        logger.info("State updated based on action.")
-        return new_state
+        try:
+            new_state = {
+                'visual': self._capture_visual_input(),
+                'auditory': self._capture_auditory_input(),
+                'textual': self._capture_textual_input(),
+                'era': self.current_state.get('era', 'Unknown'),  # Maintain era context
+                'location': self.current_state.get('location', 'Unknown')  # Maintain location context
+            }
+            logger.info("State updated based on action.")
+            return new_state
+        except Exception as e:
+            logger.error(f"Error updating state: {e}")
+            raise
 
     def _calculate_reward(self, state):
         """
@@ -109,15 +115,17 @@ class TimeTravelEnv:
         Returns:
         float: The calculated reward.
         """
-        # Error: Reward calculation logic may be too simplistic.
-        # Solution: Develop a more complex reward function that accurately reflects the agent's performance.
-        reward = 0
-        # Example complex reward calculation
-        if state['era'] == 'Medieval' and state['location'] == 'Castle':
-            reward += 10  # Reward for being in a specific era and location
-        reward += np.random.random()  # Example additional reward
-        logger.info(f"Reward calculated: {reward}")
-        return reward
+        try:
+            reward = 0
+            # Example complex reward calculation
+            if state['era'] == 'Medieval' and state['location'] == 'Castle':
+                reward += 10  # Reward for being in a specific era and location
+            reward += np.random.random()  # Example additional reward
+            logger.info(f"Reward calculated: {reward}")
+            return reward
+        except Exception as e:
+            logger.error(f"Error calculating reward: {e}")
+            raise
 
     def _check_done(self, state):
         """
@@ -129,14 +137,16 @@ class TimeTravelEnv:
         Returns:
         bool: True if the episode is done, False otherwise.
         """
-        # Error: Termination condition may not be properly defined.
-        # Solution: Implement a robust termination condition based on specific criteria.
-        done = False
-        # Example termination condition
-        if state['era'] == 'Medieval' and state['location'] == 'Castle':
-            done = True  # Example condition to end the episode
-        logger.info(f"Check if done: {done}")
-        return done
+        try:
+            done = False
+            # Example termination condition
+            if state['era'] == 'Medieval' and state['location'] == 'Castle':
+                done = True  # Example condition to end the episode
+            logger.info(f"Check if done: {done}")
+            return done
+        except Exception as e:
+            logger.error(f"Error checking done condition: {e}")
+            raise
 
     def _capture_visual_input(self):
         """
@@ -145,11 +155,13 @@ class TimeTravelEnv:
         Returns:
         numpy array: The captured visual data.
         """
-        # Error: Visual data may not be accurately captured.
-        # Solution: Ensure the visual capture method retrieves valid data.
-        visual_data = np.random.random((224, 224, 3))  # Mock data for demonstration
-        logger.info("Visual input captured.")
-        return visual_data
+        try:
+            visual_data = np.random.random((224, 224, 3))  # Mock data for demonstration
+            logger.info("Visual input captured.")
+            return visual_data
+        except Exception as e:
+            logger.error(f"Error capturing visual input: {e}")
+            raise
 
     def _capture_auditory_input(self):
         """
@@ -158,11 +170,13 @@ class TimeTravelEnv:
         Returns:
         numpy array: The captured auditory data.
         """
-        # Error: Auditory data may not be accurately captured.
-        # Solution: Ensure the auditory capture method retrieves valid data.
-        auditory_data = np.random.random((100, 80))  # Mock data for demonstration
-        logger.info("Auditory input captured.")
-        return auditory_data
+        try:
+            auditory_data = np.random.random((100, 80))  # Mock data for demonstration
+            logger.info("Auditory input captured.")
+            return auditory_data
+        except Exception as e:
+            logger.error(f"Error capturing auditory input: {e}")
+            raise
 
     def _capture_textual_input(self):
         """
@@ -171,13 +185,15 @@ class TimeTravelEnv:
         Returns:
         numpy array: The processed textual data.
         """
-        # Error: Textual data may not be processed correctly.
-        # Solution: Verify the tokenizer and sequence padding are working as intended.
-        text_data = "This is a sample sentence."  # Example textual input
-        sequences = self.tokenizer.texts_to_sequences([text_data])
-        padded_sequences = pad_sequences(sequences, maxlen=self.max_seq_length)
-        logger.info("Textual input captured and processed.")
-        return padded_sequences[0]
+        try:
+            text_data = "This is a sample sentence."  # Example textual input
+            sequences = self.tokenizer.texts_to_sequences([text_data])
+            padded_sequences = pad_sequences(sequences, maxlen=self.max_seq_length)
+            logger.info("Textual input captured and processed.")
+            return padded_sequences[0]
+        except Exception as e:
+            logger.error(f"Error capturing textual input: {e}")
+            raise
 
     def preprocess_visual_data(self, frame):
         """
@@ -194,8 +210,6 @@ class TimeTravelEnv:
             normalized_frame = resized_frame / 255.0
             logger.info("Visual data preprocessed successfully.")
             return normalized_frame
-        # Error: Issues during visual data preprocessing.
-        # Solution: Use try-except block to catch and log any errors during preprocessing.
         except Exception as e:
             logger.error(f"Error preprocessing visual data: {e}")
             raise
@@ -215,8 +229,6 @@ class TimeTravelEnv:
             log_mel_spectrogram = librosa.power_to_db(mel_spectrogram)
             logger.info("Auditory data preprocessed successfully.")
             return log_mel_spectrogram.T  # Transpose for time-major format
-        # Error: Issues during auditory data preprocessing.
-        # Solution: Use try-except block to catch and log any errors during preprocessing.
         except Exception as e:
             logger.error(f"Error preprocessing auditory data: {e}")
             raise
@@ -236,8 +248,6 @@ class TimeTravelEnv:
             padded_sequences = pad_sequences(sequences, maxlen=self.max_seq_length)
             logger.info("Textual data preprocessed successfully.")
             return padded_sequences
-        # Error: Issues during textual data preprocessing.
-        # Solution: Use try-except block to catch and log any errors during preprocessing.
         except Exception as e:
             logger.error(f"Error preprocessing textual data: {e}")
             raise
@@ -269,4 +279,3 @@ if __name__ == "__main__":
     print("Processed visual data:", processed_visual_data.shape)
     print("Processed auditory data:", processed_auditory_data.shape)
     print("Processed textual data:", processed_textual_data.shape)
-
