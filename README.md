@@ -1,148 +1,130 @@
 # Temporal Odyssey
 
-Temporal Odyssey is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." As an agent, you will navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills. This project emphasizes the multimodal nature of its agents, allowing for rich interactions and learning across various sensory inputs and outputs.
+Temporal Odyssey is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." Navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
+
+## Table of Contents
+1. [Key Features](#key-features)
+2. [Prerequisites](#prerequisites)
+3. [Installation](#installation)
+4. [Quick Start](#quick-start)
+5. [Project Structure](#project-structure)
+6. [Advanced Usage](#advanced-usage)
+7. [Contributing](#contributing)
+8. [License](#license)
+9. [References](#references)
 
 ## Key Features
+- Immersive time travel experience across multiple eras
+- Dynamic, evolving environments
+- Multimodal agent capabilities with era-specific actions
+- Intelligent reward system
+- Adaptive challenges
+- Advanced learning techniques (PPO, A3C, transfer learning, meta-learning)
+- NPC interactions and quest system
 
-### Immersive Time Travel Experience
-- **Explore meticulously crafted time periods:** Each era has its own atmosphere, challenges, and rewards.
-- **Travel through history:** Journey from the primitive past to a technologically advanced future.
-
-### Dynamic Environments
-- **Interact with evolving environments:** Your actions shape the world around you.
-- **Engage with objects and characters:** Influence your surroundings through interaction.
-
-### Multimodal Agent Capabilities
-- **Era-specific actions:** Perform tasks suited to each time period.
-  - **Primitive past:** Navigate terrains, gather resources, craft tools, and build shelters.
-  - **Present:** Trade goods and make strategic decisions.
-  - **Dystopian futures:** Scavenge supplies and navigate dangers.
-- **Multisensory learning:** Utilize visual, auditory, and textual data to enhance agent decision-making and adaptability.
-
-### Intelligent Reward System
-- **Sophisticated rewards:** Encourage exploration and survival.
-- **Consequential actions and decisions:** Your choices shape your path through history.
-
-### Adaptive Challenges
-- **Evolving obstacles:** Challenges grow with your learning progress, ensuring continuous growth and replayability.
-
-### Advanced Learning Techniques
-- **Cutting-edge methods:** Utilize PPO, A3C, transfer learning, and meta-learning.
-- **Cross-era adaptation:** Leverage knowledge from one era to adapt quickly to another.
-
-### NPC Interactions
-- **Engage with non-player characters:** Gather information, trade items, and form alliances across different eras.
-
-### Quest System
-- **Embark on quests and missions:** Complete objectives, unravel mysteries, and earn rewards to unlock new possibilities.
+## Prerequisites
+- Python 3.7+
+- pip
+- virtualenv (recommended)
 
 ## Installation
 
-To start your journey through Temporal Odyssey, follow these steps:
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/ShaliniAnandaPhD/Temporal-Odyssey.git
+1. Clone the repository:
    ```
-
-2. **Navigate to the project directory:**
-   ```bash
+   git clone https://github.com/ShaliniAnandaPhD/Temporal-Odyssey.git
    cd Temporal-Odyssey
    ```
 
-3. **Install the required dependencies:**
-   ```bash
+2. Create and activate a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
+
+3. Install the required dependencies:
+   ```
    pip install -r requirements.txt
    ```
 
-4. **Set up the virtual environment:**
-   - **Create a new virtual environment:**
-     ```bash
-     python -m venv venv
-     ```
-   - **Activate the virtual environment:**
-     - **For Windows:**
-       ```bash
-       venv\Scripts\activate
-       ```
-     - **For macOS and Linux:**
-       ```bash
-       source venv/bin/activate
-       ```
+## Quick Start
 
-## Getting Started
+To run a basic simulation:
 
-To begin your adventure through time:
-
-1. **Run the Temporal Odyssey environment and train your agent:**
-   ```python
-   from temporal_odyssey.envs.time_travel_env import TimeTravelEnv
-   from temporal_odyssey.agents.ppo_agent import PPOAgent
-   from temporal_odyssey.agents.a3c_agent import A3CAgent
-   from temporal_odyssey.models.transfer_learning import TransferLearning
-   from temporal_odyssey.models.meta_learning import MetaLearning
-
-   env = TimeTravelEnv()
-   ppo_agent = PPOAgent(env)
-   a3c_agent = A3CAgent(env)
-   transfer_learning = TransferLearning()
-   meta_learning = MetaLearning()
-
-   # Train the agents using advanced techniques
-   ppo_agent.train(transfer_learning, meta_learning)
-   a3c_agent.train(transfer_learning, meta_learning)
+1. Navigate to the project directory:
+   ```
+   cd temporal_odyssey
    ```
 
-2. **Customize your agent:** Experiment with different learning algorithms.
+2. Run the main script:
+   ```
+   python main.py
+   ```
+
+This will start a basic simulation using default settings. You'll see output describing the agent's actions and rewards as it navigates through different time periods.
 
 ## Project Structure
 
-### Environments
-- **`time_travel_env.py`**: Defines the TimeTravelEnv class, representing the time travel environment.
+- `temporal_odyssey/`
+  - `envs/`: Environment definitions
+    - `time_travel_env.py`: Main time travel environment
+  - `agents/`: Agent implementations
+    - `ppo_agent.py`: Proximal Policy Optimization agent
+    - `a3c_agent.py`: Asynchronous Advantage Actor-Critic agent
+  - `models/`: Learning models
+    - `transfer_learning.py`: Transfer learning implementation
+    - `meta_learning.py`: Meta-learning techniques
+  - `quests/`: Quest and story management
+  - `npcs/`: Non-player character implementations
+  - `monitoring/`: Performance monitoring and telemetry
+  - `main.py`: Entry point for running simulations
 
-### Agents
-- **`dqn_agent.py`**: Implements the DQN agent with advanced techniques.
-- **`ppo_agent.py`**: Implements the PPO agent.
-- **`a3c_agent.py`**: Implements the A3C agent.
-- **`hybrid_learning.py`**: Implements hybrid learning techniques.
+## Advanced Usage
 
-### Models
-- **`transfer_learning.py`**: Implements transfer learning functionality.
-- **`meta_learning.py`**: Implements meta-learning techniques.
+To customize the simulation or use specific learning techniques:
 
-### Quests
-- **`quest_manager.py`**: Defines the QuestManager class for managing quests and missions.
-- **`dynamic_story.py`**: Implements dynamic story generation.
+```python
+from temporal_odyssey.envs.time_travel_env import TimeTravelEnv
+from temporal_odyssey.agents.ppo_agent import PPOAgent
+from temporal_odyssey.models.transfer_learning import TransferLearning
 
-### NPCs
-- **`npc_manager.py`**: Defines the NPCManager class for managing NPCs and their interactions.
-- **`npc_behaviors.py`**: Implements dynamic NPC behaviors.
+# Create environment and agent
+env = TimeTravelEnv(start_era="prehistoric", difficulty="hard")
+agent = PPOAgent(env, learning_rate=0.001)
 
-### Monitoring
-- **`agent_metrics.py`**: Implements agent performance metrics monitoring.
-- **`telemetry.py`**: Implements telemetry and feedback collection.
+# Initialize transfer learning
+transfer_model = TransferLearning()
+
+# Train the agent
+agent.train(num_episodes=1000, transfer_model=transfer_model)
+
+# Test the agent
+agent.test(num_episodes=100)
+```
+
+For more detailed examples and API documentation, refer to the `docs/` directory.
 
 ## Contributing
 
-We welcome contributions from the community. If you have ideas, suggestions, or bug reports, please open an issue on GitHub. To contribute code, fork the repository and submit a pull request with your changes.
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature-branch-name`
+3. Make your changes and commit them: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature-branch-name`
+5. Submit a pull request
+
+For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
-Temporal Odyssey is released under the MIT License. You are free to use, modify, and distribute the project as per the license terms.
-
-Prepare to embark on an extraordinary journey through time with Temporal Odyssey. Explore, learn, and adapt as you navigate the challenges and wonders of different eras. Let the adventure begin!
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## References
 
-- **[Deep Reinforcement Learning: An Overview by Yuxi Li](https://arxiv.org/abs/1701.07274)**
-- **[Playing Atari with Deep Reinforcement Learning by Volodymyr Mnih et al.](https://arxiv.org/abs/1312.5602)**
-- **[Proximal Policy Optimization Algorithms by John Schulman et al.](https://arxiv.org/abs/1707.06347)**
-- **[Asynchronous Methods for Deep Reinforcement Learning by Volodymyr Mnih et al.](https://arxiv.org/abs/1602.01783)**
-- **[Meta-Learning: A Survey by Joaquin Vanschoren](https://arxiv.org/abs/1810.03548)**
-- **[A Survey on Transfer Learning by Sinno Jialin Pan and Qiang Yang](https://ieeexplore.ieee.org/document/5288526)**
-- **[Convolutional Neural Networks (LeNet) - Deep Learning by Yann LeCun et al.](https://ieeexplore.ieee.org/document/726791)**
-- **[Sequence to Sequence Learning with Neural Networks by Ilya Sutskever et al.](https://arxiv.org/abs/1409.3215)**
-- **[Attention Is All You Need by Ashish Vaswani et al.](https://arxiv.org/abs/1706.03762)**
-- **[OpenAI Gym by Greg Brockman et al.](https://arxiv.org/abs/1606.01540)**
+- [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1701.07274)
+- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
+- [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783)
+- [Meta-Learning: A Survey](https://arxiv.org/abs/1810.03548)
+- [A Survey on Transfer Learning](https://ieeexplore.ieee.org/document/5288526)
 
-[GitHub Repository](https://github.com/ShaliniAnandaPhD/Temporal-Odyssey)
+
