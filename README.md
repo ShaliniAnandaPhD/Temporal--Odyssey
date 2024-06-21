@@ -217,7 +217,7 @@ We welcome contributions! Please follow these steps:
 To run tests:
 
 ```bash
-pytest tests/
+python -m unittest tests/test_env.py
 ```
 
 For major changes, please open an issue first to discuss what you would like to change.
