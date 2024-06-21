@@ -1,4 +1,3 @@
-# Temporal Odyssey
 
 **Temporal Odyssey** is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." Navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
 
@@ -10,9 +9,13 @@
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [Advanced Usage](#advanced-usage)
+- [Concepts](#concepts)
+- [Data and Models](#data-and-models)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 - [References](#references)
+- [Citation](#citation)
 
 ## Key Features
 
@@ -29,6 +32,7 @@
 - Python 3.7+
 - `pip`
 - `virtualenv` (recommended)
+- Certain dependencies might have specific version requirements. Check `requirements.txt` for details.
 
 ## Installation
 
@@ -68,7 +72,7 @@ To run a basic simulation:
     python main.py
     ```
 
-This will start a basic simulation using default settings. You'll see output describing the agent's actions and rewards as it navigates through different time periods.
+This will start a basic simulation using default settings. You'll see output describing the agent's actions and rewards as it navigates through different time periods. Expect to see how the agent adapts and learns in dynamic environments with era-specific challenges.
 
 ## Project Structure
 
@@ -115,6 +119,26 @@ agent.test(num_episodes=100)
 
 For more detailed examples and API documentation, refer to the `docs/` directory.
 
+## Concepts
+
+- **PPO (Proximal Policy Optimization)**: An advanced reinforcement learning algorithm that balances exploration and exploitation.
+- **A3C (Asynchronous Advantage Actor-Critic)**: A deep reinforcement learning algorithm that uses asynchronous gradient descent for more efficient learning.
+
+## Data and Models
+
+To access or generate necessary data files or models:
+
+1. Ensure the `data/` directory contains the required datasets.
+2. Use provided scripts in the `models/` directory to generate and train models.
+
+## Troubleshooting
+
+- **Common Issues**:
+  - *Installation errors*: Ensure all dependencies are correctly installed.
+  - *Runtime errors*: Check the configuration files and paths.
+
+For detailed troubleshooting, refer to the `docs/troubleshooting.md`.
+
 ## Contributing
 
 We welcome contributions! Please follow these steps:
@@ -124,6 +148,12 @@ We welcome contributions! Please follow these steps:
 3. Make your changes and commit them: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin feature-branch-name`
 5. Submit a pull request
+
+To run tests:
+
+```bash
+pytest tests/
+```
 
 For major changes, please open an issue first to discuss what you would like to change.
 
@@ -138,3 +168,18 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783)
 - [Meta-Learning: A Survey](https://arxiv.org/abs/1810.03548)
 - [A Survey on Transfer Learning](https://arxiv.org/abs/0907.0209)
+
+## Citation
+
+If you use this project in your research, please cite it as follows:
+
+```
+@misc{ananda2024temporalodyssey,
+  author = {Shalini Ananda},
+  title = {Temporal Odyssey: Embark on a Journey Through Time},
+  year = {2024},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/ShaliniAnandaPhD/Temporal-Odyssey}}
+}
+```
