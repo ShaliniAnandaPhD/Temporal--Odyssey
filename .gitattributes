@@ -1,0 +1,128 @@
+# Set default behavior to automatically normalize line endings.
+* text=auto
+
+# Source code
+*.py text diff=python
+*.pyx text diff=python
+*.pyd binary
+*.pyo binary
+*.pyc binary
+*.pickle binary
+*.pkl binary
+*.npy binary
+*.npz binary
+*.h5 binary
+*.pb binary
+
+# Jupyter notebooks
+*.ipynb text eol=lf linguist-language=Jupyter Notebook
+
+# Documentation
+*.md text diff=markdown linguist-documentation
+*.rst text
+*.txt text
+*.pdf binary diff=astextplain
+
+# Data files
+*.csv text
+*.json text
+*.yaml text
+*.yml text
+*.xml text
+
+# Audio files
+*.mp3 binary
+*.wav binary
+*.ogg binary
+
+# Image files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# Scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+
+# Configuration files
+*.ini text
+*.cfg text
+*.conf text
+*.toml text
+
+# Git files
+.gitattributes text export-ignore
+.gitignore text export-ignore
+.gitkeep text export-ignore
+
+# Python-specific files
+requirements.txt text
+setup.py text
+setup.cfg text
+pyproject.toml text
+tox.ini text
+Pipfile text
+Pipfile.lock text
+
+# Docker
+Dockerfile text
+docker-compose.yml text
+
+# CI/CD
+.travis.yml text
+.gitlab-ci.yml text
+appveyor.yml text
+.github/workflows/*.yml text
+
+# Editor config
+.editorconfig text
+
+# License
+LICENSE text
+
+# Exclude files from exporting
+.gitignore export-ignore
+.gitattributes export-ignore
+
+# Large File Storage (LFS) settings
+*.h5 filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
+*.npy filter=lfs diff=lfs merge=lfs -text
+*.npz filter=lfs diff=lfs merge=lfs -text
+assets/*.mp3 filter=lfs diff=lfs merge=lfs -text
+assets/*.wav filter=lfs diff=lfs merge=lfs -text
+assets/*.png filter=lfs diff=lfs merge=lfs -text
+assets/*.jpg filter=lfs diff=lfs merge=lfs -text
+
+# Merge driver settings
+db.sqlite3 merge=ours
+temporal_odyssey/config/settings.py merge=ours
+
+# Specify files that should always have CRLF line endings on checkout.
+*.sln text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.mov binary
+*.mp4 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+
+# Exclude specific directories from GitHub language statistics
+ui/node_modules/* linguist-vendored
+docs/* linguist-documentation
+third_party/** linguist-vendored
+external/** linguist-vendored
+generated/** binary
