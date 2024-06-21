@@ -1,5 +1,5 @@
 
-
+import random
 import logging
 from temporal_odyssey.npcs.npc_behaviors import FriendlyBehavior, MysteriousBehavior
 
