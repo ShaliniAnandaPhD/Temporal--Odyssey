@@ -13,6 +13,7 @@ logging.addLevelName(ETHICAL_VIOLATION, "ETHICAL_VIOLATION")
 logging.addLevelName(SAFETY_ALERT, "SAFETY_ALERT")
 
 # Custom logger class with additional methods for AI safety logging
+
 class SafetyLogger(logging.Logger):
     def __init__(self, name, level=logging.NOTSET):
         super().__init__(name, level)
