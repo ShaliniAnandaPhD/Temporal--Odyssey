@@ -1,4 +1,3 @@
-
 **Temporal Odyssey** is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." Navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
 
 ## Table of Contents
@@ -126,16 +125,36 @@ For more detailed examples and API documentation, refer to the `docs/` directory
 
 ## Data and Models
 
-To access or generate necessary data files or models:
+### Data
 
-1. Ensure the `data/` directory contains the required datasets.
-2. Use provided scripts in the `models/` directory to generate and train models.
+To access necessary data files:
+
+1. Ensure you have the `data/` directory in your project root.
+2. Download the required datasets from [this link](https://example.com/datasets) and place them in the `data/` directory.
+3. Alternatively, generate synthetic data using provided scripts in the `scripts/` directory:
+
+    ```bash
+    python scripts/generate_data.py
+    ```
+
+### Models
+
+To access or generate models:
+
+1. Pre-trained models can be downloaded from [this link](https://example.com/models).
+2. Place the downloaded models in the `models/` directory.
+3. Train your own models using the provided training scripts:
+
+    ```bash
+    python temporal_odyssey/models/train_model.py
+    ```
 
 ## Troubleshooting
 
 - **Common Issues**:
   - *Installation errors*: Ensure all dependencies are correctly installed.
   - *Runtime errors*: Check the configuration files and paths.
+  - *Data errors*: Ensure data files are correctly placed in the `data/` directory.
 
 For detailed troubleshooting, refer to the `docs/troubleshooting.md`.
 
