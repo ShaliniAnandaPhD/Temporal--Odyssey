@@ -1,19 +1,21 @@
 # Temporal Odyssey
 
-Temporal Odyssey is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." Navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
+**Temporal Odyssey** is an immersive reinforcement learning project inspired by H.G. Wells' "The Time Machine." Navigate through distinct time periods, facing unique challenges and dynamic environments that test your adaptability and survival skills.
 
 ## Table of Contents
-1. [Key Features](#key-features)
-2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
-4. [Quick Start](#quick-start)
-5. [Project Structure](#project-structure)
-6. [Advanced Usage](#advanced-usage)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [References](#references)
+
+- [Key Features](#key-features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Advanced Usage](#advanced-usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [References](#references)
 
 ## Key Features
+
 - Immersive time travel experience across multiple eras
 - Dynamic, evolving environments
 - Multimodal agent capabilities with era-specific actions
@@ -23,60 +25,70 @@ Temporal Odyssey is an immersive reinforcement learning project inspired by H.G.
 - NPC interactions and quest system
 
 ## Prerequisites
+
 - Python 3.7+
-- pip
-- virtualenv (recommended)
+- `pip`
+- `virtualenv` (recommended)
 
 ## Installation
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/ShaliniAnandaPhD/Temporal-Odyssey.git
-   cd Temporal-Odyssey
-   ```
+### Clone the repository
 
-2. Create and activate a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
+```bash
+git clone https://github.com/ShaliniAnandaPhD/Temporal-Odyssey.git
+cd Temporal-Odyssey
+```
 
-3. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+### Create and activate a virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+```
+
+### Install the required dependencies
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Quick Start
 
 To run a basic simulation:
 
 1. Navigate to the project directory:
-   ```
-   cd temporal_odyssey
-   ```
+
+    ```bash
+    cd temporal_odyssey
+    ```
 
 2. Run the main script:
-   ```
-   python main.py
-   ```
+
+    ```bash
+    python main.py
+    ```
 
 This will start a basic simulation using default settings. You'll see output describing the agent's actions and rewards as it navigates through different time periods.
 
 ## Project Structure
 
-- `temporal_odyssey/`
-  - `envs/`: Environment definitions
+- **temporal_odyssey/**
+  - **envs/**: Environment definitions
     - `time_travel_env.py`: Main time travel environment
-  - `agents/`: Agent implementations
+  - **agents/**: Agent implementations
     - `ppo_agent.py`: Proximal Policy Optimization agent
     - `a3c_agent.py`: Asynchronous Advantage Actor-Critic agent
-  - `models/`: Learning models
+  - **models/**: Learning models
     - `transfer_learning.py`: Transfer learning implementation
     - `meta_learning.py`: Meta-learning techniques
-  - `quests/`: Quest and story management
-  - `npcs/`: Non-player character implementations
-  - `monitoring/`: Performance monitoring and telemetry
+  - **quests/**: Quest and story management
+  - **npcs/**: Non-player character implementations
+  - **monitoring/**: Performance monitoring and telemetry
   - `main.py`: Entry point for running simulations
+
+- **docs/**: Documentation and guides
+- **tests/**: Test cases and testing framework
+- **ui/**: User interface components
 
 ## Advanced Usage
 
@@ -117,14 +129,12 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## References
 
-- [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1701.07274)
+- [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1810.06339)
 - [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
 - [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783)
 - [Meta-Learning: A Survey](https://arxiv.org/abs/1810.03548)
-- [A Survey on Transfer Learning](https://ieeexplore.ieee.org/document/5288526)
-
-
+- [A Survey on Transfer Learning](https://arxiv.org/abs/0907.0209)
