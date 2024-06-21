@@ -1,0 +1,213 @@
+# EditorConfig helps maintain consistent coding styles for multiple developers
+# working on the same project across various editors and IDEs.
+# For more information about the properties used in this file,
+# please see the EditorConfig documentation:
+# https://editorconfig.org/
+
+# Top-most EditorConfig file
+root = true
+
+# Default settings for all files
+[*]
+# Use UTF-8 encoding without BOM
+charset = utf-8
+# Use Unix-style line endings
+end_of_line = lf
+# Insert a final newline at the end of every file
+insert_final_newline = true
+# Trim trailing whitespace on each line
+trim_trailing_whitespace = true
+# Indent using spaces
+indent_style = space
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Python files
+[*.py]
+# Maximum line length
+max_line_length = 120
+
+# JavaScript and JSON files
+[*.{js,json}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# YAML files
+[*.{yaml,yml}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Markdown files
+[*.md]
+# Do not trim trailing whitespace for Markdown files
+# (as it can be significant in Markdown syntax)
+trim_trailing_whitespace = false
+
+# Makefiles
+[Makefile]
+# Use tabs for indentation in Makefiles
+indent_style = tab
+
+# Shell scripts
+[*.sh]
+# Use Unix-style line endings
+end_of_line = lf
+
+# Windows batch files
+[*.bat]
+# Use Windows-style line endings
+end_of_line = crlf
+
+# HTML files
+[*.html]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# CSS, SCSS, and LESS files
+[*.{css,scss,less}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# XML files
+[*.xml]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Dockerfile
+[Dockerfile]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# .gitignore and .gitattributes files
+[.git*]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Configuration files
+[*.{ini,cfg,conf}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Requirements files
+[requirements*.txt]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Jupyter Notebooks
+[*.ipynb]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Cython files
+[*.pyx]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# RST documentation files
+[*.rst]
+# Use 3 spaces for indentation (common in RST)
+indent_size = 3
+
+# Protobuf files
+[*.proto]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# SQL files
+[*.sql]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# CI/CD configuration files
+[*.{yml,yaml}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Go files
+[*.go]
+# Use tabs for indentation (Go's standard)
+indent_style = tab
+
+# Rust files
+[*.rs]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# TypeScript files
+[*.ts]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# C and C++ files
+[*.{c,cpp,h,hpp}]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Java files
+[*.java]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Kotlin files
+[*.kt]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Swift files
+[*.swift]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Ruby files
+[*.rb]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# PHP files
+[*.php]
+# Use 4 spaces for indentation
+indent_size = 4
+
+# Lua files
+[*.lua]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Haskell files
+[*.hs]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Scala files
+[*.scala]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Clojure files
+[*.clj]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# R files
+[*.R]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Dart files
+[*.dart]
+# Use 2 spaces for indentation
+indent_size = 2
+
+# Ignore minified JavaScript files
+[**.min.js]
+indent_style = ignore
+insert_final_newline = ignore
+
+# Ignore vendor directories
+[**/vendor/**]
+indent_style = ignore
+indent_size = ignore
+end_of_line = ignore
+trim_trailing_whitespace = ignore
+charset = ignore
+insert_final_newline = ignore
