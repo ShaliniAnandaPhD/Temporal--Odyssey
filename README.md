@@ -9,7 +9,7 @@
 - [Project Structure](#project-structure)
 - [Advanced Usage](#advanced-usage)
 - [Concepts](#concepts)
-- [Data and Models](#data-and-models)
+- [Environment Configuration and Models](#environment-configuration-and-models)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
@@ -123,40 +123,86 @@ For more detailed examples and API documentation, refer to the `docs/` directory
 - **PPO (Proximal Policy Optimization)**: An advanced reinforcement learning algorithm that balances exploration and exploitation.
 - **A3C (Asynchronous Advantage Actor-Critic)**: A deep reinforcement learning algorithm that uses asynchronous gradient descent for more efficient learning.
 
-## Data and Models
+## Environment Configuration and Models
 
-### Data
+### Environment Configuration
 
-To access necessary data files:
+The Temporal Odyssey environment is fully simulated and doesn't require external datasets. To configure the environment:
 
-1. Ensure you have the `data/` directory in your project root.
-2. Download the required datasets from [this link](https://example.com/datasets) and place them in the `data/` directory.
-3. Alternatively, generate synthetic data using provided scripts in the `scripts/` directory:
+1. Navigate to the `config/` directory in your project root.
+2. Modify `environment_config.yaml` to adjust parameters such as:
+   - Time periods available
+   - Difficulty levels
+   - Reward structures
+   - NPC behavior patterns
 
-    ```bash
-    python scripts/generate_data.py
-    ```
+Example:
+
+```yaml
+time_periods:
+  - prehistoric
+  - medieval
+  - modern
+  - future
+difficulty: medium
+reward_scaling: 1.0
+npc_density: 0.5
+```
 
 ### Models
 
-To access or generate models:
+Temporal Odyssey uses reinforcement learning models that are trained within the simulated environment:
 
-1. Pre-trained models can be downloaded from [this link](https://example.com/models).
-2. Place the downloaded models in the `models/` directory.
-3. Train your own models using the provided training scripts:
+1. To start with a fresh model:
 
-    ```bash
-    python temporal_odyssey/models/train_model.py
-    ```
+   ```bash
+   python temporal_odyssey/models/initialize_model.py --agent_type ppo
+   ```
+
+   This will create a new model in the `models/` directory.
+
+2. To continue training from a checkpoint:
+
+   ```bash
+   python temporal_odyssey/models/train_model.py --agent_type ppo --checkpoint models/ppo_latest.pth
+   ```
+
+3. To evaluate a trained model:
+
+   ```bash
+   python temporal_odyssey/models/evaluate_model.py --agent_type ppo --model_path models/ppo_best.pth
+   ```
+
+Note: The environment and models are generated and evolved during the reinforcement learning process. No pre-trained models or external datasets are required to get started.
 
 ## Troubleshooting
 
-- **Common Issues**:
-  - *Installation errors*: Ensure all dependencies are correctly installed.
-  - *Runtime errors*: Check the configuration files and paths.
-  - *Data errors*: Ensure data files are correctly placed in the `data/` directory.
+### Common Issues:
 
-For detailed troubleshooting, refer to the `docs/troubleshooting.md`.
+1. **Environment Setup Errors**:
+   - Ensure all dependencies are correctly installed using `pip install -r requirements.txt`.
+   - Check that your Python version is 3.7+ as specified in the prerequisites.
+
+2. **Runtime Errors**:
+   - Verify that the configuration files in `config/` are correctly formatted and contain valid parameters.
+   - Ensure all paths in your scripts are correct relative to the project root.
+
+3. **GPU-related Issues**:
+   - If using GPU acceleration, check that CUDA is properly installed and compatible with your PyTorch version.
+   - Try running on CPU if GPU issues persist: add `--device cpu` to your run commands.
+
+4. **Model Training Problems**:
+   - If training is unstable, try adjusting hyperparameters in `config/training_config.yaml`.
+   - For out-of-memory errors, reduce batch size or model complexity.
+
+5. **Rendering Issues**:
+   - If the environment fails to render, check that all required visualization libraries are installed.
+   - Ensure your system supports the rendering backend (e.g., OpenGL).
+
+For more detailed troubleshooting:
+- Check the logs in the `logs/` directory for error messages and stack traces.
+- Refer to `docs/troubleshooting.md` for an extensive guide on resolving common issues.
+- If problems persist, please open an issue on our GitHub repository with a detailed description of the error and your system configuration.
 
 ## Contributing
 
