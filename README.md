@@ -27,6 +27,7 @@
 - NPC interactions and quest system
 
 [Notion page with results from simulation experiments](https://www.notion.so/shalini-ananda-phd/Simulation-examples-9df61d0b9f6c432fa729f4835af2b4a9)
+[Notion page with Applications of Temporal Odyssey](https://www.notion.so/shalini-ananda-phd/Simulation-examples-9df61d0b9f6c432fa729f4835af2b4a9)
 
 ## Prerequisites
 
