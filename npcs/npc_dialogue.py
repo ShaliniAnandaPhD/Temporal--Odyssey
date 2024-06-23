@@ -1,5 +1,6 @@
 import random
 
+
 class NPCDialogueManager:
     def __init__(self):
         self.dialogues = {
